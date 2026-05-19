@@ -26,7 +26,7 @@ def to_mermaid(data: dict) -> str:
         label = sanitise_label(node["label"])
         id_map[original] = sanitise_id(original, label)
 
-    lines = ["flowchart TD"]
+    lines = ["graph TD"]
 
     for node in nodes:
         nid = id_map[node["id"]]
