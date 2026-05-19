@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Whiteboard Digitiser</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Whiteboard Digitiser</h1>
+    <p class="subtitle">Upload a whiteboard photo and get a clean Mermaid diagram</p>
+
+    <div class="upload-area" id="upload-area">
+      <input type="file" id="file-input" accept="image/*" hidden>
+      <p>Click to upload or drag and drop</p>
+      <p class="hint">JPEG, PNG, WebP supported</p>
+    </div>
+
+    <div id="preview-section" style="display:none">
+      <img id="preview-img" src="" alt="Preview">
+    </div>
+
+    <button id="digitise-btn" style="display:none">Digitise</button>
+    <div id="loading" style="display:none">Processing...</div>
+
+    <div id="result-section" style="display:none">
+      <h2>Diagram</h2>
+      <div class="mermaid" id="mermaid-output"></div>
+      <h2>Mermaid Code</h2>
+      <textarea id="mermaid-code" readonly></textarea>
+      <button id="copy-btn">Copy code</button>
+    </div>
+  </div>
+  <script src="/static/script.js"></script>
+</body>
+</html>
