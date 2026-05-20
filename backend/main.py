@@ -58,14 +58,16 @@ async def digitise(request: Request, file: UploadFile = File(...)):
     clean_bytes = preprocess_image(raw_bytes)
 
     try:
-        diagram_data = extract_diagram(clean_bytes)
-        logger.info(f"Extraction success | ip={ip} | nodes={len(diagram_data.get('nodes', []))}")
-    except TimeoutError:
-        logger.error(f"Gemini timeout | ip={ip}")
-        raise HTTPException(status_code=504, detail="Gemini API timed out. Please try again.")
+        diagram_data, model_used = extract_diagram(clean_bytes)
+        logger.info(f"Extraction success | ip={ip} | model={model_used} | nodes={len(diagram_data.get('nodes', []))}")
     except Exception as e:
         logger.error(f"Extraction failed | ip={ip} | error={str(e)}")
         raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
 
     mermaid_code = to_mermaid(diagram_data)
-    return JSONResponse({"mermaid": mermaid_code, "raw": diagram_data})
+
+    return JSONResponse({
+        "mermaid": mermaid_code,
+        "raw": diagram_data,
+        "model_used": model_used
+    })

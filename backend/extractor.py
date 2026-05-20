@@ -1,7 +1,7 @@
 import os
 import json
 import re
-import asyncio
+import time
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -9,6 +9,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Fallback chain — tries in order
+MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+]
 
 PROMPT = """
 You are a diagram parser. Analyze this whiteboard image carefully.
@@ -37,24 +44,8 @@ STRICT RULES:
 - Every string value must use double quotes
 """
 
-def extract_diagram(image_bytes: bytes, timeout: int = 30) -> dict:
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
-                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-                PROMPT
-            ],
-            config=types.GenerateContentConfig(
-                timeout=timeout
-            )
-        )
-    except Exception as e:
-        if "timeout" in str(e).lower() or "deadline" in str(e).lower():
-            raise TimeoutError("Gemini API timed out after 30 seconds")
-        raise
-
-    raw = response.text.strip()
+def _parse_response(raw: str) -> dict:
+    raw = raw.strip()
 
     if raw.startswith("```"):
         raw = raw.split("\n", 1)[1]
@@ -69,4 +60,43 @@ def extract_diagram(image_bytes: bytes, timeout: int = 30) -> dict:
         match = re.search(r'\{.*\}', raw, re.DOTALL)
         if match:
             return json.loads(match.group())
-        raise ValueError(f"Could not parse JSON from Gemini response: {e}\nRaw: {raw[:300]}")
+        raise ValueError(f"Could not parse JSON: {e}\nRaw: {raw[:300]}")
+
+
+def _call_model(model: str, image_bytes: bytes) -> dict:
+    response = client.models.generate_content(
+        model=model,
+        contents=[
+            types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+            PROMPT
+        ]
+    )
+    return _parse_response(response.text)
+
+
+def extract_diagram(image_bytes: bytes) -> tuple:
+    last_error = None
+
+    for model in MODELS:
+        try:
+            result = _call_model(model, image_bytes)
+            return result, model
+
+        except Exception as e:
+            last_error = e
+            err_str = str(e)
+
+            is_retryable = any(code in err_str for code in [
+                "503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED",
+                "500", "INTERNAL", "timeout", "Timeout"
+            ])
+
+            is_not_found = "404" in err_str or "NOT_FOUND" in err_str
+
+            if is_retryable and not is_not_found:
+                time.sleep(1.5)
+                continue
+            else:
+                raise
+
+    raise RuntimeError(f"All models failed. Last error: {last_error}")
