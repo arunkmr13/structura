@@ -2,36 +2,218 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Whiteboard Digitiser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sketchflow — Whiteboard Digitiser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Whiteboard Digitiser</h1>
-    <p class="subtitle">Upload a whiteboard photo and get a clean Mermaid diagram</p>
 
-    <div class="upload-area" id="upload-area">
-      <input type="file" id="file-input" accept="image/*" hidden>
-      <p>Click to upload or drag and drop</p>
-      <p class="hint">JPEG, PNG, WebP supported</p>
+  <!-- Background grid -->
+  <div class="bg-grid"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="2" y="2" width="10" height="10" rx="2" fill="var(--accent)"/>
+          <rect x="16" y="2" width="10" height="10" rx="2" fill="var(--accent)" opacity="0.4"/>
+          <rect x="2" y="16" width="10" height="10" rx="2" fill="var(--accent)" opacity="0.4"/>
+          <rect x="16" y="16" width="10" height="10" rx="2" fill="var(--accent)"/>
+          <line x1="12" y1="7" x2="16" y2="7" stroke="var(--accent)" stroke-width="2"/>
+          <line x1="7" y1="12" x2="7" y2="16" stroke="var(--accent)" stroke-width="2"/>
+          <line x1="21" y1="12" x2="21" y2="16" stroke="var(--accent)" stroke-width="2"/>
+          <line x1="12" y1="21" x2="16" y2="21" stroke="var(--accent)" stroke-width="2"/>
+        </svg>
+      </div>
+      <span class="logo-text">Sketchflow</span>
+    </div>
+    <nav class="nav-pills">
+      <span class="pill pill--active">Digitise</span>
+      <span class="pill">API</span>
+      <span class="pill">Docs</span>
+    </nav>
+    <div class="header-right">
+      <span class="badge-free">Free Beta</span>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <span class="dot-pulse"></span>
+      Powered by Gemini Vision
+    </div>
+    <h1 class="hero-title">
+      Turn sketches into<br>
+      <span class="hero-accent">clean diagrams</span>
+    </h1>
+    <p class="hero-sub">Upload any whiteboard photo, napkin sketch, or hand-drawn flowchart — get back production-ready Mermaid code in seconds.</p>
+  </section>
+
+  <!-- Main workspace -->
+  <main class="workspace">
+
+    <!-- Left panel: Upload -->
+    <div class="panel panel--upload" id="panel-upload">
+
+      <!-- Drop zone -->
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" hidden>
+        <div class="dropzone-idle" id="dz-idle">
+          <div class="dz-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <rect x="4" y="8" width="32" height="24" rx="4" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <path d="M20 26V14M20 14L15 19M20 14L25 19" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="dz-title">Drop your sketch here</p>
+          <p class="dz-sub">or <button class="link-btn" onclick="document.getElementById('file-input').click()">browse files</button></p>
+          <p class="dz-formats">JPEG · PNG · WebP · Max 5MB</p>
+        </div>
+        <div class="dropzone-over" id="dz-over" style="display:none">
+          <p class="dz-title">Release to upload</p>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-wrap" id="preview-wrap" style="display:none">
+        <div class="preview-header">
+          <span class="preview-label">Original</span>
+          <button class="icon-btn" id="change-btn" title="Change image">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M1 7C1 3.686 3.686 1 7 1s6 2.686 6 6-2.686 6-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M1 4V7H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Change
+          </button>
+        </div>
+        <img id="preview-img" src="" alt="Preview" class="preview-img">
+        <div class="file-meta" id="file-meta"></div>
+      </div>
+
+      <!-- CTA -->
+      <button class="btn-digitise" id="digitise-btn" style="display:none">
+        <span id="btn-text">Digitise</span>
+        <svg id="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="btn-spinner" id="btn-spinner" style="display:none"></div>
+      </button>
+
+      <!-- Progress stages -->
+      <div class="stages" id="stages" style="display:none">
+        <div class="stage" id="stage-1">
+          <div class="stage-dot"></div>
+          <span>Preprocessing image</span>
+        </div>
+        <div class="stage" id="stage-2">
+          <div class="stage-dot"></div>
+          <span>Extracting diagram</span>
+        </div>
+        <div class="stage" id="stage-3">
+          <div class="stage-dot"></div>
+          <span>Rendering Mermaid</span>
+        </div>
+      </div>
+
     </div>
 
-    <div id="preview-section" style="display:none">
-      <img id="preview-img" src="" alt="Preview">
+    <!-- Right panel: Output -->
+    <div class="panel panel--output" id="panel-output">
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-grid">
+          <div class="empty-node">Start</div>
+          <div class="empty-arrow">→</div>
+          <div class="empty-node empty-node--diamond">Process</div>
+          <div class="empty-arrow">→</div>
+          <div class="empty-node">End</div>
+        </div>
+        <p class="empty-text">Your diagram will appear here</p>
+      </div>
+
+      <!-- Result -->
+      <div class="result" id="result" style="display:none">
+
+        <!-- Diagram metadata -->
+        <div class="meta-bar" id="meta-bar"></div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab tab--active" data-tab="diagram">Diagram</button>
+          <button class="tab" data-tab="code">Mermaid Code</button>
+          <button class="tab" data-tab="json">Raw JSON</button>
+        </div>
+
+        <!-- Tab: Diagram -->
+        <div class="tab-content tab-content--active" id="tab-diagram">
+          <div class="diagram-wrap">
+            <div class="mermaid" id="mermaid-output"></div>
+            <div class="render-fallback" id="render-fallback" style="display:none">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="8" stroke="#f59e0b" stroke-width="1.5"/>
+                <path d="M10 6v5M10 13v1" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <strong>Visual render unavailable</strong> — diagram is complex or cyclic.
+                Copy the Mermaid code and paste into <a href="https://mermaid.live" target="_blank">mermaid.live</a> to view.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Code -->
+        <div class="tab-content" id="tab-code">
+          <div class="code-wrap">
+            <pre id="mermaid-code-display" class="code-block"></pre>
+          </div>
+        </div>
+
+        <!-- Tab: JSON -->
+        <div class="tab-content" id="tab-json">
+          <div class="code-wrap">
+            <pre id="json-display" class="code-block"></pre>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button class="action-btn" id="copy-mermaid-btn">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M2 10V2h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Copy Mermaid
+          </button>
+          <button class="action-btn" id="download-btn">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 2v7M7 9L4.5 6.5M7 9L9.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            Download .md
+          </button>
+          <button class="action-btn action-btn--ghost" id="retry-btn">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M1 7C1 3.686 3.686 1 7 1s6 2.686 6 6-2.686 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M1 4V7H4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Retry
+          </button>
+        </div>
+
+      </div>
     </div>
 
-    <button id="digitise-btn" style="display:none">Digitise</button>
-    <div id="loading" style="display:none">Processing...</div>
+  </main>
 
-    <div id="result-section" style="display:none">
-      <h2>Diagram</h2>
-      <div class="mermaid" id="mermaid-output"></div>
-      <h2>Mermaid Code</h2>
-      <textarea id="mermaid-code" readonly></textarea>
-      <button id="copy-btn">Copy code</button>
-    </div>
-  </div>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
   <script src="/static/script.js"></script>
 </body>
 </html>

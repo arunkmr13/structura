@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import asyncio
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -27,7 +28,7 @@ Return a JSON object with exactly these fields:
 STRICT RULES:
 - Node ids must be simple letters or short alphanumeric strings like A, B, C or N1, N2
 - Labels must be plain text only — no special characters like < > [ ] { } ( ) = + - /
-- Replace any math or code expressions with plain English: 
+- Replace any math or code expressions with plain English:
   e.g. "i <= length(A)-2" becomes "i less than length"
   e.g. "A[i] > A[i+1]" becomes "A i greater than A i plus 1"
   e.g. "swap(A[i], A[i+1])" becomes "swap elements"
@@ -36,30 +37,35 @@ STRICT RULES:
 - Every string value must use double quotes
 """
 
-def extract_diagram(image_bytes: bytes) -> dict:
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=[
-            types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-            PROMPT
-        ]
-    )
+def extract_diagram(image_bytes: bytes, timeout: int = 30) -> dict:
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                PROMPT
+            ],
+            config=types.GenerateContentConfig(
+                timeout=timeout
+            )
+        )
+    except Exception as e:
+        if "timeout" in str(e).lower() or "deadline" in str(e).lower():
+            raise TimeoutError("Gemini API timed out after 30 seconds")
+        raise
 
     raw = response.text.strip()
 
-    # Strip markdown fences if model adds them
     if raw.startswith("```"):
         raw = raw.split("\n", 1)[1]
         raw = raw.rsplit("```", 1)[0].strip()
 
-    # Remove any control characters that break JSON
     raw = re.sub(r'[\x00-\x1f\x7f]', ' ', raw)
     raw = raw.strip()
 
     try:
         return json.loads(raw)
     except json.JSONDecodeError as e:
-        # Try to extract JSON object from response if there's surrounding text
         match = re.search(r'\{.*\}', raw, re.DOTALL)
         if match:
             return json.loads(match.group())
