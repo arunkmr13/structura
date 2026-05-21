@@ -4,7 +4,7 @@ const labelDark      = themeToggle.querySelector('.theme-label-dark');
 const labelLight     = themeToggle.querySelector('.theme-label-light');
 const iconMoon       = themeToggle.querySelector('.icon-moon');
 const iconSun        = themeToggle.querySelector('.icon-sun');
-const savedTheme     = localStorage.getItem('sketchflow-theme') || 'dark';
+const savedTheme     = localStorage.getItem('Structura-theme') || 'dark';
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -26,7 +26,7 @@ applyTheme(savedTheme);
 themeToggle.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('sketchflow-theme', next);
+  localStorage.setItem('Structura-theme', next);
   applyTheme(next);
 });
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sketchflow — Whiteboard Digitiser</title>
+  <title>Structura — Diagram & Molecule Visualiser</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
@@ -28,7 +28,7 @@
           <line x1="12" y1="21" x2="16" y2="21" stroke="var(--accent)" stroke-width="2"/>
         </svg>
       </div>
-      <span class="logo-text">Sketchflow</span>
+      <span class="logo-text">Structura</span>
     </div>
     <nav class="nav-pills">
       <span class="pill pill--active" data-page="digitise">Digitise</span>
@@ -66,7 +66,7 @@
         Turn sketches into<br>
         <span class="hero-accent">clean diagrams</span>
       </h1>
-      <p class="hero-sub">Upload any whiteboard photo, napkin sketch, or hand-drawn flowchart — get back production-ready Mermaid code in seconds.</p>
+      <p class="hero-sub">Upload any whiteboard photo or hand-drawn flowchart — get back production-ready Mermaid code in seconds. Or type a chemical formula to visualise any molecule.</p>
     </section>
 
     <main class="workspace">
@@ -196,7 +196,7 @@
     <section class="hero hero--page">
       <div class="hero-eyebrow"><span class="dot-pulse"></span>REST API</div>
       <h1 class="hero-title">API <span class="hero-accent">Reference</span></h1>
-      <p class="hero-sub">Integrate Sketchflow into your own app. One endpoint, multipart form data, JSON response.</p>
+      <p class="hero-sub">Integrate Structura into your own app. One endpoint, multipart form data, JSON response.</p>
     </section>
 
     <div class="doc-wrap">
@@ -552,7 +552,7 @@ if (response.ok) {
       <div class="doc-section">
         <div class="doc-section-label">Reliability</div>
         <h2 class="doc-section-title">Model Fallback Chain</h2>
-        <p class="doc-text">Sketchflow automatically tries multiple Gemini models if one is unavailable. You never need to specify a model — fallback is handled server-side.</p>
+        <p class="doc-text">Structura automatically tries multiple Gemini models if one is unavailable. You never need to specify a model — fallback is handled server-side.</p>
 
         <div class="fallback-chain">
           <div class="fallback-step fallback-step--primary">
@@ -591,7 +591,7 @@ if (response.ok) {
     <section class="hero hero--page">
       <div class="hero-eyebrow"><span class="dot-pulse"></span>Documentation</div>
       <h1 class="hero-title">How it <span class="hero-accent">works</span></h1>
-      <p class="hero-sub">Everything you need to get the best results from Sketchflow — pipeline internals, supported formats, and tips from real usage.</p>
+      <p class="hero-sub">Everything you need to get the best results from Structura — pipeline internals, supported formats, and tips from real usage.</p>
     </section>
 
     <div class="doc-wrap">
@@ -614,7 +614,7 @@ if (response.ok) {
             <div class="pipeline-content">
               <div class="pipeline-num">Stage 1</div>
               <div class="pipeline-title">Image Preprocessing</div>
-              <p class="pipeline-desc">The raw photo is cleaned up using OpenCV before anything else happens. This includes resizing large images, converting to grayscale, denoising with a Gaussian filter, and applying adaptive thresholding to make the diagram lines pop against the background. This stage is why Sketchflow can handle badly-lit or slightly blurry photos.</p>
+              <p class="pipeline-desc">The raw photo is cleaned up using OpenCV before anything else happens. This includes resizing large images, converting to grayscale, denoising with a Gaussian filter, and applying adaptive thresholding to make the diagram lines pop against the background. This stage is why Structura can handle badly-lit or slightly blurry photos.</p>
               <div class="pipeline-tech">
                 <span class="tech-tag">OpenCV</span>
                 <span class="tech-tag">Pillow</span>
@@ -678,7 +678,7 @@ if (response.ok) {
       <div class="doc-section">
         <div class="doc-section-label">Input</div>
         <h2 class="doc-section-title">Supported formats</h2>
-        <p class="doc-text">Sketchflow works best with high-contrast hand-drawn diagrams. Here's what works well and what doesn't.</p>
+        <p class="doc-text">Structura works best with high-contrast hand-drawn diagrams. Here's what works well and what doesn't.</p>
 
         <div class="format-grid">
           <div class="format-col format-col--yes">
@@ -1043,7 +1043,7 @@ if (response.ok) {
       <div class="doc-section">
         <div class="doc-section-label">Molecules Output</div>
         <h2 class="doc-section-title">Using SMILES output</h2>
-        <p class="doc-text">The SMILES string returned by Sketchflow is validated by RDKit and can be used directly in a wide range of chemistry tools.</p>
+        <p class="doc-text">The SMILES string returned by Structura is validated by RDKit and can be used directly in a wide range of chemistry tools.</p>
 
         <div class="output-grid">
           <div class="output-item">
@@ -1123,7 +1123,7 @@ if (response.ok) {
       <div class="doc-section">
         <div class="doc-section-label">Limitations</div>
         <h2 class="doc-section-title">Known limitations</h2>
-        <p class="doc-text">Sketchflow works well on most diagrams but has known constraints worth understanding before you rely on it.</p>
+        <p class="doc-text">Structura works well on most diagrams but has known constraints worth understanding before you rely on it.</p>
 
         <div class="limitations-list">
           <div class="limitation-item">

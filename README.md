@@ -1,4 +1,4 @@
-# Sketchflow
+# Structura
 
 > A multi-feature diagram and chemistry visualisation tool — turn hand-drawn sketches into Mermaid diagrams, and chemical formulas into 2D molecular structures.
 
@@ -46,7 +46,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    Sketchflow                        │
+│                    Structura                        │
 ├─────────────────────┬───────────────────────────────┤
 │   POST /digitise    │      POST /chemistry           │
 ├─────────────────────┼───────────────────────────────┤
