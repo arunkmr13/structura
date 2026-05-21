@@ -11,7 +11,6 @@
 </head>
 <body>
 
-  <!-- Background grid -->
   <div class="bg-grid"></div>
 
   <!-- Header -->
@@ -32,184 +31,681 @@
       <span class="logo-text">Sketchflow</span>
     </div>
     <nav class="nav-pills">
-      <span class="pill pill--active">Digitise</span>
-      <span class="pill">API</span>
-      <span class="pill">Docs</span>
+      <span class="pill pill--active" data-page="digitise">Digitise</span>
+      <span class="pill" data-page="api">API</span>
+      <span class="pill" data-page="docs">Docs</span>
     </nav>
     <div class="header-right">
       <span class="badge-free">Free Beta</span>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-eyebrow">
-      <span class="dot-pulse"></span>
-      Powered by Gemini Vision
-    </div>
-    <h1 class="hero-title">
-      Turn sketches into<br>
-      <span class="hero-accent">clean diagrams</span>
-    </h1>
-    <p class="hero-sub">Upload any whiteboard photo, napkin sketch, or hand-drawn flowchart — get back production-ready Mermaid code in seconds.</p>
-  </section>
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- PAGE: DIGITISE                                          -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="page-digitise">
 
-  <!-- Main workspace -->
-  <main class="workspace">
-
-    <!-- Left panel: Upload -->
-    <div class="panel panel--upload" id="panel-upload">
-
-      <!-- Drop zone -->
-      <div class="dropzone" id="dropzone">
-        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" hidden>
-        <div class="dropzone-idle" id="dz-idle">
-          <div class="dz-icon">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <rect x="4" y="8" width="32" height="24" rx="4" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
-              <path d="M20 26V14M20 14L15 19M20 14L25 19" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <p class="dz-title">Drop your sketch here</p>
-          <p class="dz-sub">or <button class="link-btn" onclick="document.getElementById('file-input').click()">browse files</button></p>
-          <p class="dz-formats">JPEG · PNG · WebP · Max 5MB</p>
-        </div>
-        <div class="dropzone-over" id="dz-over" style="display:none">
-          <p class="dz-title">Release to upload</p>
-        </div>
+    <section class="hero">
+      <div class="hero-eyebrow">
+        <span class="dot-pulse"></span>
+        Powered by Gemini Vision
       </div>
+      <h1 class="hero-title">
+        Turn sketches into<br>
+        <span class="hero-accent">clean diagrams</span>
+      </h1>
+      <p class="hero-sub">Upload any whiteboard photo, napkin sketch, or hand-drawn flowchart — get back production-ready Mermaid code in seconds.</p>
+    </section>
 
-      <!-- Preview -->
-      <div class="preview-wrap" id="preview-wrap" style="display:none">
-        <div class="preview-header">
-          <span class="preview-label">Original</span>
-          <button class="icon-btn" id="change-btn" title="Change image">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1 7C1 3.686 3.686 1 7 1s6 2.686 6 6-2.686 6-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              <path d="M1 4V7H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Change
-          </button>
-        </div>
-        <img id="preview-img" src="" alt="Preview" class="preview-img">
-        <div class="file-meta" id="file-meta"></div>
-      </div>
+    <main class="workspace">
 
-      <!-- CTA -->
-      <button class="btn-digitise" id="digitise-btn" style="display:none">
-        <span id="btn-text">Digitise</span>
-        <svg id="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div class="btn-spinner" id="btn-spinner" style="display:none"></div>
-      </button>
-
-      <!-- Progress stages -->
-      <div class="stages" id="stages" style="display:none">
-        <div class="stage" id="stage-1">
-          <div class="stage-dot"></div>
-          <span>Preprocessing image</span>
-        </div>
-        <div class="stage" id="stage-2">
-          <div class="stage-dot"></div>
-          <span>Extracting diagram</span>
-        </div>
-        <div class="stage" id="stage-3">
-          <div class="stage-dot"></div>
-          <span>Rendering Mermaid</span>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Right panel: Output -->
-    <div class="panel panel--output" id="panel-output">
-
-      <!-- Empty state -->
-      <div class="empty-state" id="empty-state">
-        <div class="empty-grid">
-          <div class="empty-node">Start</div>
-          <div class="empty-arrow">→</div>
-          <div class="empty-node empty-node--diamond">Process</div>
-          <div class="empty-arrow">→</div>
-          <div class="empty-node">End</div>
-        </div>
-        <p class="empty-text">Your diagram will appear here</p>
-      </div>
-
-      <!-- Result -->
-      <div class="result" id="result" style="display:none">
-
-        <!-- Diagram metadata -->
-        <div class="meta-bar" id="meta-bar"></div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-          <button class="tab tab--active" data-tab="diagram">Diagram</button>
-          <button class="tab" data-tab="code">Mermaid Code</button>
-          <button class="tab" data-tab="json">Raw JSON</button>
-        </div>
-
-        <!-- Tab: Diagram -->
-        <div class="tab-content tab-content--active" id="tab-diagram">
-          <div class="diagram-wrap">
-            <div class="mermaid" id="mermaid-output"></div>
-            <div class="render-fallback" id="render-fallback" style="display:none">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="10" r="8" stroke="#f59e0b" stroke-width="1.5"/>
-                <path d="M10 6v5M10 13v1" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Left panel: Upload -->
+      <div class="panel panel--upload" id="panel-upload">
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" hidden>
+          <div class="dropzone-idle" id="dz-idle">
+            <div class="dz-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <rect x="4" y="8" width="32" height="24" rx="4" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <path d="M20 26V14M20 14L15 19M20 14L25 19" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <div>
-                <strong>Visual render unavailable</strong> — diagram is complex or cyclic.
-                Copy the Mermaid code and paste into <a href="https://mermaid.live" target="_blank">mermaid.live</a> to view.
+            </div>
+            <p class="dz-title">Drop your sketch here</p>
+            <p class="dz-sub">or <button class="link-btn" onclick="document.getElementById('file-input').click()">browse files</button></p>
+            <p class="dz-formats">JPEG · PNG · WebP · Max 5MB</p>
+          </div>
+          <div class="dropzone-over" id="dz-over" style="display:none">
+            <p class="dz-title">Release to upload</p>
+          </div>
+        </div>
+
+        <div class="preview-wrap" id="preview-wrap" style="display:none">
+          <div class="preview-header">
+            <span class="preview-label">Original</span>
+            <button class="icon-btn" id="change-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 7C1 3.686 3.686 1 7 1s6 2.686 6 6-2.686 6-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M1 4V7H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Change
+            </button>
+          </div>
+          <img id="preview-img" src="" alt="Preview" class="preview-img">
+          <div class="file-meta" id="file-meta"></div>
+        </div>
+
+        <button class="btn-digitise" id="digitise-btn" style="display:none">
+          <span id="btn-text">Digitise</span>
+          <svg id="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="btn-spinner" id="btn-spinner" style="display:none"></div>
+        </button>
+
+        <div class="stages" id="stages" style="display:none">
+          <div class="stage" id="stage-1"><div class="stage-dot"></div><span>Preprocessing image</span></div>
+          <div class="stage" id="stage-2"><div class="stage-dot"></div><span>Extracting diagram</span></div>
+          <div class="stage" id="stage-3"><div class="stage-dot"></div><span>Rendering Mermaid</span></div>
+        </div>
+      </div>
+
+      <!-- Right panel: Output -->
+      <div class="panel panel--output" id="panel-output">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-grid">
+            <div class="empty-node">Start</div>
+            <div class="empty-arrow">→</div>
+            <div class="empty-node empty-node--diamond">Process</div>
+            <div class="empty-arrow">→</div>
+            <div class="empty-node">End</div>
+          </div>
+          <p class="empty-text">Your diagram will appear here</p>
+        </div>
+
+        <div class="result" id="result" style="display:none">
+          <div class="meta-bar" id="meta-bar"></div>
+          <div class="tabs">
+            <button class="tab tab--active" data-tab="diagram">Diagram</button>
+            <button class="tab" data-tab="code">Mermaid Code</button>
+            <button class="tab" data-tab="json">Raw JSON</button>
+          </div>
+          <div class="tab-content tab-content--active" id="tab-diagram">
+            <div class="diagram-wrap">
+              <div class="mermaid" id="mermaid-output"></div>
+              <div class="render-fallback" id="render-fallback" style="display:none">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="8" stroke="#f59e0b" stroke-width="1.5"/>
+                  <path d="M10 6v5M10 13v1" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <div><strong>Could not render diagram visually.</strong><br>
+                Copy the Mermaid code and paste into <a href="https://mermaid.live" target="_blank">mermaid.live</a> to view.</div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Tab: Code -->
-        <div class="tab-content" id="tab-code">
-          <div class="code-wrap">
-            <pre id="mermaid-code-display" class="code-block"></pre>
+          <div class="tab-content" id="tab-code">
+            <div class="code-wrap"><pre id="mermaid-code-display" class="code-block"></pre></div>
+          </div>
+          <div class="tab-content" id="tab-json">
+            <div class="code-wrap"><pre id="json-display" class="code-block"></pre></div>
+          </div>
+          <div class="actions">
+            <button class="action-btn" id="copy-mermaid-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M2 10V2h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Copy Mermaid
+            </button>
+            <button class="action-btn" id="download-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 2v7M7 9L4.5 6.5M7 9L9.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+              Download .md
+            </button>
+            <button class="action-btn action-btn--ghost" id="retry-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 7C1 3.686 3.686 1 7 1s6 2.686 6 6-2.686 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                <path d="M1 4V7H4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Retry
+            </button>
           </div>
         </div>
-
-        <!-- Tab: JSON -->
-        <div class="tab-content" id="tab-json">
-          <div class="code-wrap">
-            <pre id="json-display" class="code-block"></pre>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="actions">
-          <button class="action-btn" id="copy-mermaid-btn">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
-              <path d="M2 10V2h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Copy Mermaid
-          </button>
-          <button class="action-btn" id="download-btn">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 2v7M7 9L4.5 6.5M7 9L9.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-            Download .md
-          </button>
-          <button class="action-btn action-btn--ghost" id="retry-btn">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1 7C1 3.686 3.686 1 7 1s6 2.686 6 6-2.686 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-              <path d="M1 4V7H4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Retry
-          </button>
-        </div>
-
       </div>
-    </div>
 
-  </main>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- PAGE: API                                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="page-api" style="display:none">
+    <section class="hero hero--page">
+      <div class="hero-eyebrow"><span class="dot-pulse"></span>REST API</div>
+      <h1 class="hero-title">API <span class="hero-accent">Reference</span></h1>
+      <p class="hero-sub">Integrate Sketchflow into your own app. One endpoint, multipart form data, JSON response.</p>
+    </section>
+
+    <div class="doc-wrap">
+
+      <!-- Endpoint -->
+      <div class="doc-section">
+        <div class="doc-section-label">Endpoint</div>
+        <h2 class="doc-section-title">POST /digitise</h2>
+        <p class="doc-text">Accepts a whiteboard image and returns structured Mermaid code, a visual diagram, and raw JSON describing the extracted nodes and edges.</p>
+
+        <div class="endpoint-bar">
+          <span class="method-badge">POST</span>
+          <span class="endpoint-url">/digitise</span>
+          <button class="copy-inline-btn" data-copy="http://localhost:8000/digitise">Copy endpoint</button>
+        </div>
+      </div>
+
+      <p class="doc-text" style="margin-top:1rem">
+  Want to explore interactively? Try the built-in 
+  <a href="/docs" target="_blank" style="color:var(--accent-2)">Swagger UI →</a>
+</p>
+
+      <!-- Request -->
+      <div class="doc-section">
+        <div class="doc-section-label">Request</div>
+        <h2 class="doc-section-title">Parameters</h2>
+
+        <table class="param-table">
+          <thead>
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>file</code></td>
+              <td>File</td>
+              <td><span class="badge-required">required</span></td>
+              <td>Image file — JPEG, PNG, or WebP. Max 5MB.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Examples -->
+      <div class="doc-section">
+        <div class="doc-section-label">Examples</div>
+        <h2 class="doc-section-title">Code Samples</h2>
+
+        <div class="code-tabs">
+          <button class="code-tab code-tab--active" data-code="curl">curl</button>
+          <button class="code-tab" data-code="python">Python</button>
+          <button class="code-tab" data-code="js">JavaScript</button>
+        </div>
+
+        <div class="code-sample code-sample--active" id="code-curl">
+          <div class="code-header">
+            <span>curl</span>
+            <button class="copy-inline-btn" data-copy-id="code-curl">Copy</button>
+          </div>
+          <pre class="code-block">curl -X POST http://localhost:8000/digitise \
+  -F "file=@/path/to/whiteboard.jpg"</pre>
+        </div>
+
+        <div class="code-sample" id="code-python">
+          <div class="code-header">
+            <span>Python</span>
+            <button class="copy-inline-btn" data-copy-id="code-python">Copy</button>
+          </div>
+          <pre class="code-block">import requests
+
+with open("whiteboard.jpg", "rb") as f:
+    response = requests.post(
+        "http://localhost:8000/digitise",
+        files={"file": ("whiteboard.jpg", f, "image/jpeg")}
+    )
+
+if response.status_code == 200:
+    data = response.json()
+    print("Mermaid code:")
+    print(data["mermaid"])
+    print(f"\nModel used: {data['model_used']}")
+    print(f"Nodes: {len(data['raw']['nodes'])}")
+    print(f"Edges: {len(data['raw']['edges'])}")
+else:
+    print(f"Error {response.status_code}: {response.json()['detail']}")</pre>
+        </div>
+
+        <div class="code-sample" id="code-js">
+          <div class="code-header">
+            <span>JavaScript</span>
+            <button class="copy-inline-btn" data-copy-id="code-js">Copy</button>
+          </div>
+          <pre class="code-block">const formData = new FormData();
+formData.append("file", fileInput.files[0]);
+
+const response = await fetch("http://localhost:8000/digitise", {
+  method: "POST",
+  body: formData,
+});
+
+if (response.ok) {
+  const data = await response.json();
+  console.log("Mermaid:", data.mermaid);
+  console.log("Model used:", data.model_used);
+  console.log("Nodes:", data.raw.nodes);
+} else {
+  const err = await response.json();
+  console.error("Error:", err.detail);
+}</pre>
+        </div>
+      </div>
+
+      <!-- Response -->
+      <div class="doc-section">
+        <div class="doc-section-label">Response</div>
+        <h2 class="doc-section-title">200 — Success</h2>
+
+        <div class="code-sample code-sample--active">
+          <div class="code-header"><span>JSON</span></div>
+          <pre class="code-block">{
+  "mermaid": "graph TD\n    A[\"Start\"] --> B[\"Initialize\"]\n    B --> C{\"Condition?\"}\n    C -->|\"Yes\"| D[\"Process\"]\n    C -->|\"No\"| E[\"End\"]",
+  "model_used": "gemini-2.5-flash",
+  "raw": {
+    "diagram_type": "flowchart",
+    "title": null,
+    "nodes": [
+      { "id": "A", "label": "Start",       "shape": "circle"  },
+      { "id": "B", "label": "Initialize",  "shape": "rect"    },
+      { "id": "C", "label": "Condition?",  "shape": "diamond" },
+      { "id": "D", "label": "Process",     "shape": "rect"    },
+      { "id": "E", "label": "End",         "shape": "circle"  }
+    ],
+    "edges": [
+      { "from": "A", "to": "B", "label": "",    "style": "solid" },
+      { "from": "B", "to": "C", "label": "",    "style": "solid" },
+      { "from": "C", "to": "D", "label": "Yes", "style": "solid" },
+      { "from": "C", "to": "E", "label": "No",  "style": "solid" }
+    ]
+  }
+}</pre>
+        </div>
+      </div>
+
+      <!-- Error codes -->
+      <div class="doc-section">
+        <div class="doc-section-label">Errors</div>
+        <h2 class="doc-section-title">Error Codes</h2>
+
+        <table class="param-table">
+          <thead>
+            <tr><th>Code</th><th>Status</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>400</code></td><td>Bad Request</td><td>Invalid file type or file exceeds 5MB</td></tr>
+            <tr><td><code>429</code></td><td>Too Many Requests</td><td>Rate limit exceeded — 10 requests per 60 seconds per IP</td></tr>
+            <tr><td><code>500</code></td><td>Internal Server Error</td><td>Extraction failed — JSON parse error or all models failed</td></tr>
+            <tr><td><code>504</code></td><td>Gateway Timeout</td><td>Gemini API timed out</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-sample code-sample--active" style="margin-top:1rem">
+          <div class="code-header"><span>Error response shape</span></div>
+          <pre class="code-block">{
+  "detail": "File too large. Maximum size is 5MB"
+}</pre>
+        </div>
+      </div>
+
+      <!-- Model fallback -->
+      <div class="doc-section">
+        <div class="doc-section-label">Reliability</div>
+        <h2 class="doc-section-title">Model Fallback Chain</h2>
+        <p class="doc-text">Sketchflow automatically tries multiple Gemini models if one is unavailable. You never need to specify a model — fallback is handled server-side.</p>
+
+        <div class="fallback-chain">
+          <div class="fallback-step fallback-step--primary">
+            <span class="fallback-num">1</span>
+            <div>
+              <div class="fallback-model">gemini-2.5-flash</div>
+              <div class="fallback-desc">Primary — fastest, best quality</div>
+            </div>
+          </div>
+          <div class="fallback-arrow">↓ on 503 / 429</div>
+          <div class="fallback-step">
+            <span class="fallback-num">2</span>
+            <div>
+              <div class="fallback-model">gemini-2.0-flash</div>
+              <div class="fallback-desc">First fallback</div>
+            </div>
+          </div>
+          <div class="fallback-arrow">↓ on 503 / 429</div>
+          <div class="fallback-step">
+            <span class="fallback-num">3</span>
+            <div>
+              <div class="fallback-model">gemini-2.0-flash-lite</div>
+              <div class="fallback-desc">Final fallback — most available</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- PAGE: DOCS                                              -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="page-docs" style="display:none">
+    <section class="hero hero--page">
+      <div class="hero-eyebrow"><span class="dot-pulse"></span>Documentation</div>
+      <h1 class="hero-title">How it <span class="hero-accent">works</span></h1>
+      <p class="hero-sub">Everything you need to get the best results from Sketchflow — pipeline internals, supported formats, and tips from real usage.</p>
+    </section>
+
+    <div class="doc-wrap">
+
+      <!-- Pipeline -->
+      <div class="doc-section">
+        <div class="doc-section-label">Pipeline</div>
+        <h2 class="doc-section-title">Three-stage processing</h2>
+        <p class="doc-text">Every image goes through three stages before you see a result. Understanding each stage helps you know why results vary and how to improve them.</p>
+
+        <div class="pipeline-steps">
+
+          <div class="pipeline-step">
+            <div class="pipeline-icon pipeline-icon--1">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <rect x="2" y="2" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M6 11h10M6 7h6M6 15h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="pipeline-content">
+              <div class="pipeline-num">Stage 1</div>
+              <div class="pipeline-title">Image Preprocessing</div>
+              <p class="pipeline-desc">The raw photo is cleaned up using OpenCV before anything else happens. This includes resizing large images, converting to grayscale, denoising with a Gaussian filter, and applying adaptive thresholding to make the diagram lines pop against the background. This stage is why Sketchflow can handle badly-lit or slightly blurry photos.</p>
+              <div class="pipeline-tech">
+                <span class="tech-tag">OpenCV</span>
+                <span class="tech-tag">Pillow</span>
+                <span class="tech-tag">Adaptive Threshold</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-connector">
+            <div class="pipeline-line"></div>
+            <span class="pipeline-connector-label">cleaned image</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-icon pipeline-icon--2">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 11l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="pipeline-content">
+              <div class="pipeline-num">Stage 2</div>
+              <div class="pipeline-title">Gemini Vision Extraction</div>
+              <p class="pipeline-desc">The cleaned image is sent to Gemini Vision as a base64-encoded JPEG along with a structured prompt. The model identifies every shape (node), arrow (edge), label, and diagram type. It returns a strict JSON object with nodes and edges. If the primary model is unavailable, the system automatically falls back through the model chain.</p>
+              <div class="pipeline-tech">
+                <span class="tech-tag">gemini-2.5-flash</span>
+                <span class="tech-tag">Structured JSON</span>
+                <span class="tech-tag">Model Fallback</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-connector">
+            <div class="pipeline-line"></div>
+            <span class="pipeline-connector-label">nodes + edges JSON</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-icon pipeline-icon--3">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M4 6h14M4 11h10M4 16h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M17 14l3 2-3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="pipeline-content">
+              <div class="pipeline-num">Stage 3</div>
+              <div class="pipeline-title">Mermaid Rendering</div>
+              <p class="pipeline-desc">The JSON is converted to valid Mermaid syntax. Each node shape maps to its Mermaid equivalent — rectangles become <code>[ ]</code>, diamonds become <code>{ }</code>, circles become <code>([ ])</code>. Labels are sanitised to remove special characters that break Mermaid's parser. The output renders live in the browser using Mermaid.js, and is also available as copyable code or a downloadable <code>.md</code> file.</p>
+              <div class="pipeline-tech">
+                <span class="tech-tag">Mermaid.js v10</span>
+                <span class="tech-tag">graph TD</span>
+                <span class="tech-tag">Label Sanitisation</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Supported formats -->
+      <div class="doc-section">
+        <div class="doc-section-label">Input</div>
+        <h2 class="doc-section-title">Supported formats</h2>
+        <p class="doc-text">Sketchflow works best with high-contrast hand-drawn diagrams. Here's what works well and what doesn't.</p>
+
+        <div class="format-grid">
+          <div class="format-col format-col--yes">
+            <div class="format-col-header">
+              <span class="format-dot format-dot--yes"></span>
+              Works well
+            </div>
+            <ul class="format-list">
+              <li>Whiteboard photos (straight-on)</li>
+              <li>Scanned hand-drawn flowcharts</li>
+              <li>Napkin sketches with clear shapes</li>
+              <li>Printed diagrams photographed</li>
+              <li>Black marker on white background</li>
+              <li>Simple flowcharts and process maps</li>
+              <li>Mind maps with clear branches</li>
+              <li>System architecture sketches</li>
+            </ul>
+          </div>
+          <div class="format-col format-col--no">
+            <div class="format-col-header">
+              <span class="format-dot format-dot--no"></span>
+              Works poorly
+            </div>
+            <ul class="format-list">
+              <li>Screenshots of digital diagrams</li>
+              <li>Very dark or low-contrast photos</li>
+              <li>Heavy glare on whiteboard surface</li>
+              <li>Extremely messy or overlapping lines</li>
+              <li>Diagrams with dense text labels</li>
+              <li>Photos taken at steep angles</li>
+              <li>Pencil sketches (too light)</li>
+              <li>Complex UML with many subgraphs</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="format-specs">
+          <div class="spec-item">
+            <span class="spec-label">File types</span>
+            <span class="spec-value">JPEG · PNG · WebP</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Max file size</span>
+            <span class="spec-value">5 MB</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Recommended resolution</span>
+            <span class="spec-value">1000px+ on longest side</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Rate limit</span>
+            <span class="spec-value">10 requests / 60 seconds</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="doc-section">
+        <div class="doc-section-label">Best Practices</div>
+        <h2 class="doc-section-title">Tips for best results</h2>
+        <p class="doc-text">Small changes to how you draw and photograph your diagrams make a significant difference in extraction accuracy.</p>
+
+        <div class="tips-grid">
+          <div class="tip-card">
+            <div class="tip-icon">📸</div>
+            <div class="tip-title">Shoot straight-on</div>
+            <div class="tip-desc">Position your camera directly in front of the whiteboard — not at an angle. Perspective distortion makes shapes harder to identify correctly.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">💡</div>
+            <div class="tip-title">Even lighting</div>
+            <div class="tip-desc">Avoid direct light sources that cause glare on the whiteboard surface. Natural diffused light or indirect room lighting works best.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">✏️</div>
+            <div class="tip-title">Clear, bold shapes</div>
+            <div class="tip-desc">Use a dark marker and draw shapes with clear, closed boundaries. Boxes, diamonds, and ovals with definite edges extract much more reliably than sketchy lines.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">→</div>
+            <div class="tip-title">Obvious arrow direction</div>
+            <div class="tip-desc">Draw arrowheads that are clearly visible and directional. Ambiguous lines without arrowheads may be interpreted as edges with uncertain direction.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">🔤</div>
+            <div class="tip-title">Short labels</div>
+            <div class="tip-desc">Keep node labels to 3–5 words maximum. Labels that overflow their shapes or overlap arrows are harder to associate with the correct element.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">🧹</div>
+            <div class="tip-title">Clean whiteboard</div>
+            <div class="tip-desc">Erase old diagrams completely before drawing a new one. Ghost marks from previous drawings confuse the model and produce extra phantom nodes.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div class="doc-section">
+        <div class="doc-section-label">Output</div>
+        <h2 class="doc-section-title">Using Mermaid diagrams</h2>
+        <p class="doc-text">Mermaid is a widely supported diagram format. Once you've copied the code, you can use it in many places without any extra tools.</p>
+
+        <div class="output-grid">
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M3 3h12v12H3z" stroke="var(--accent-2)" stroke-width="1.3" rx="2"/>
+                <path d="M6 9h6M9 6v6" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">GitHub</div>
+              <div class="output-desc">Paste Mermaid code in any README.md or issue — renders automatically</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="2" width="14" height="14" rx="3" stroke="var(--accent-2)" stroke-width="1.3"/>
+                <path d="M5 9h8M5 6h5M5 12h6" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">Notion</div>
+              <div class="output-desc">Use the Mermaid code block — Notion renders it as a diagram inline</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M4 4l5 5-5 5M10 14h4" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">VS Code</div>
+              <div class="output-desc">Install the Mermaid Preview extension to view diagrams inside your editor</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="7" stroke="var(--accent-2)" stroke-width="1.3"/>
+                <path d="M6 9l2 2 4-4" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">mermaid.live</div>
+              <div class="output-desc">Online editor for viewing, editing, and exporting complex diagrams as PNG or SVG</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="4" width="14" height="10" rx="2" stroke="var(--accent-2)" stroke-width="1.3"/>
+                <path d="M6 8h6M6 11h4" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">Confluence</div>
+              <div class="output-desc">Use the Mermaid macro in Confluence pages for team documentation</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M9 2v14M2 9h14" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">Any Markdown</div>
+              <div class="output-desc">Wrap in ```mermaid code fences — works in GitLab, Obsidian, HackMD, and more</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Limitations -->
+      <div class="doc-section">
+        <div class="doc-section-label">Limitations</div>
+        <h2 class="doc-section-title">Known limitations</h2>
+        <p class="doc-text">Sketchflow works well on most diagrams but has known constraints worth understanding before you rely on it.</p>
+
+        <div class="limitations-list">
+          <div class="limitation-item">
+            <div class="limitation-icon">⚠️</div>
+            <div>
+              <div class="limitation-title">Cyclic diagrams may not render visually</div>
+              <div class="limitation-desc">Mermaid's layout engine occasionally fails on diagrams with loops or back-edges (like bubble sort). The Mermaid code is still correct — use <a href="https://mermaid.live" target="_blank">mermaid.live</a> to render it.</div>
+            </div>
+          </div>
+          <div class="limitation-item">
+            <div class="limitation-icon">⚠️</div>
+            <div>
+              <div class="limitation-title">Special characters are simplified</div>
+              <div class="limitation-desc">Labels containing math expressions, code syntax, or special characters (<code>&lt; &gt; [ ] { } = +</code>) are converted to plain English to keep the Mermaid output valid.</div>
+            </div>
+          </div>
+          <div class="limitation-item">
+            <div class="limitation-icon">⚠️</div>
+            <div>
+              <div class="limitation-title">Free tier rate limits</div>
+              <div class="limitation-desc">The Gemini free tier has daily and per-minute request quotas. If all models are exhausted, requests will fail until the quota resets. Quotas reset at midnight Pacific Time.</div>
+            </div>
+          </div>
+          <div class="limitation-item">
+            <div class="limitation-icon">⚠️</div>
+            <div>
+              <div class="limitation-title">Accuracy varies with image quality</div>
+              <div class="limitation-desc">Very messy, low-contrast, or angled photos produce less accurate extractions. The preprocessing stage helps but cannot fully compensate for poor source images.</div>
+            </div>
+          </div>
+          <div class="limitation-item">
+            <div class="limitation-icon">⚠️</div>
+            <div>
+              <div class="limitation-title">No layout preservation</div>
+              <div class="limitation-desc">Mermaid handles its own layout automatically. The spatial arrangement of nodes in your original sketch is not preserved — only the logical structure (connections and labels) carries over.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
