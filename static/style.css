@@ -1225,6 +1225,17 @@ body {
   border: 1px solid rgba(248,113,113,0.2);
   letter-spacing: 0.04em;
 }
+.badge-optional {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(139,139,158,0.12);
+  color: var(--text-2);
+  border: 1px solid rgba(139,139,158,0.2);
+  letter-spacing: 0.04em;
+}
 
 /* ── Code tabs ─────────────────────────────────────────── */
 .code-tabs {
@@ -1851,3 +1862,27 @@ body {
 }
 
 .smiles-note a { color: var(--accent-2); }
+
+.api-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.api-divider::before,
+.api-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.api-divider span {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+}

@@ -353,6 +353,190 @@ if (response.ok) {
         </div>
       </div>
 
+<!-- Divider -->
+      <div class="api-divider">
+        <span>Second Endpoint</span>
+      </div>
+
+      <!-- Chemistry Endpoint -->
+      <div class="doc-section">
+        <div class="doc-section-label">Endpoint</div>
+        <h2 class="doc-section-title">POST /chemistry</h2>
+        <p class="doc-text">Accepts a chemical formula or molecule name and returns a 2D structural diagram image, SMILES notation, and molecular metadata.</p>
+
+        <div class="endpoint-bar">
+          <span class="method-badge">POST</span>
+          <span class="endpoint-url">/chemistry</span>
+          <button class="copy-inline-btn" data-copy="http://localhost:8000/chemistry">Copy endpoint</button>
+        </div>
+
+        <p class="doc-text" style="margin-top:1rem">
+          Want to explore interactively? Try the built-in
+          <a href="/docs" target="_blank" style="color:var(--accent-2)">Swagger UI →</a>
+        </p>
+      </div>
+
+      <!-- Chemistry Request -->
+      <div class="doc-section">
+        <div class="doc-section-label">Request</div>
+        <h2 class="doc-section-title">Parameters</h2>
+        <p class="doc-text">Accepts JSON body — not multipart form data like <code>/digitise</code>.</p>
+
+        <table class="param-table">
+          <thead>
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>formula</code></td>
+              <td>string</td>
+              <td><span class="badge-required">required</span></td>
+              <td>Chemical formula (e.g. H2O), common name (e.g. caffeine), or IUPAC name. Max 200 characters.</td>
+            </tr>
+            <tr>
+              <td><code>style</code></td>
+              <td>string</td>
+              <td><span class="badge-optional">optional</span></td>
+              <td>Diagram style — <code>"skeletal"</code> (default) or <code>"lewis"</code>. Skeletal shows bonds only with carbons implied. Lewis shows all atoms including hydrogens explicitly.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Chemistry Examples -->
+      <div class="doc-section">
+        <div class="doc-section-label">Examples</div>
+        <h2 class="doc-section-title">Code Samples</h2>
+
+        <div class="code-tabs">
+          <button class="code-tab code-tab--active" data-code="chem-curl">curl</button>
+          <button class="code-tab" data-code="chem-python">Python</button>
+          <button class="code-tab" data-code="chem-js">JavaScript</button>
+        </div>
+
+        <div class="code-sample code-sample--active" id="code-chem-curl">
+          <div class="code-header">
+            <span>curl</span>
+            <button class="copy-inline-btn" data-copy-id="code-chem-curl">Copy</button>
+          </div>
+          <pre class="code-block"># Skeletal diagram of caffeine
+curl -X POST http://localhost:8000/chemistry \
+  -H "Content-Type: application/json" \
+  -d '{"formula": "caffeine", "style": "skeletal"}'
+
+# Lewis diagram of water
+curl -X POST http://localhost:8000/chemistry \
+  -H "Content-Type: application/json" \
+  -d '{"formula": "H2O", "style": "lewis"}'</pre>
+        </div>
+
+        <div class="code-sample" id="code-chem-python">
+          <div class="code-header">
+            <span>Python</span>
+            <button class="copy-inline-btn" data-copy-id="code-chem-python">Copy</button>
+          </div>
+          <pre class="code-block">import requests
+import base64
+
+response = requests.post(
+    "http://localhost:8000/chemistry",
+    json={"formula": "aspirin", "style": "skeletal"}
+)
+
+if response.status_code == 200:
+    data = response.json()
+
+    # Save the image
+    image_data = data["image"]
+    if image_data.startswith("data:image/png;base64,"):
+        png_bytes = base64.b64decode(image_data.split(",")[1])
+        with open("molecule.png", "wb") as f:
+            f.write(png_bytes)
+        print("Image saved to molecule.png")
+
+    print(f"SMILES: {data['smiles']}")
+    print(f"Model used: {data['model_used']}")
+    print(f"Formula: {data['metadata']['molecular_formula']}")
+    print(f"Weight: {data['metadata']['molecular_weight']}")
+    print(f"Description: {data['metadata']['description']}")
+else:
+    print(f"Error {response.status_code}: {response.json()['detail']}")</pre>
+        </div>
+
+        <div class="code-sample" id="code-chem-js">
+          <div class="code-header">
+            <span>JavaScript</span>
+            <button class="copy-inline-btn" data-copy-id="code-chem-js">Copy</button>
+          </div>
+          <pre class="code-block">const response = await fetch("http://localhost:8000/chemistry", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ formula: "glucose", style: "skeletal" }),
+});
+
+if (response.ok) {
+  const data = await response.json();
+
+  // Display the image
+  const img = document.createElement("img");
+  img.src = data.image;
+  document.body.appendChild(img);
+
+  console.log("SMILES:", data.smiles);
+  console.log("Model used:", data.model_used);
+  console.log("Metadata:", data.metadata);
+} else {
+  const err = await response.json();
+  console.error("Error:", err.detail);
+}</pre>
+        </div>
+      </div>
+
+      <!-- Chemistry Response -->
+      <div class="doc-section">
+        <div class="doc-section-label">Response</div>
+        <h2 class="doc-section-title">200 — Success</h2>
+
+        <div class="code-sample code-sample--active">
+          <div class="code-header"><span>JSON</span></div>
+          <pre class="code-block">{
+  "image": "data:image/png;base64,iVBORw0KGgo...",
+  "smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
+  "model_used": "gemini-2.5-flash",
+  "metadata": {
+    "iupac_name": "1,3,7-trimethyl-2,3,6,7-tetrahydro-1H-purine-2,6-dione",
+    "common_name": "Caffeine",
+    "molecular_formula": "C8H10N4O2",
+    "molecular_weight": "194.19 g/mol",
+    "bond_count": 25,
+    "atom_count": 24,
+    "description": "Caffeine is a central nervous system stimulant found in coffee, tea, and many other beverages."
+  }
+}</pre>
+        </div>
+
+        <p class="doc-text" style="margin-top:1rem">
+          The <code>image</code> field is a base64-encoded PNG (or SVG fallback) — set it directly as an <code>img</code> src attribute to display it. The <code>smiles</code> field is a canonical SMILES string validated by RDKit.
+        </p>
+      </div>
+
+      <!-- Chemistry Errors -->
+      <div class="doc-section">
+        <div class="doc-section-label">Errors</div>
+        <h2 class="doc-section-title">Error Codes</h2>
+
+        <table class="param-table">
+          <thead>
+            <tr><th>Code</th><th>Status</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>400</code></td><td>Bad Request</td><td>Empty formula, formula exceeds 200 characters, or RDKit rejected the generated SMILES as invalid</td></tr>
+            <tr><td><code>429</code></td><td>Too Many Requests</td><td>Rate limit exceeded — 10 requests per 60 seconds per IP (shared with /digitise)</td></tr>
+            <tr><td><code>500</code></td><td>Internal Server Error</td><td>Gemini returned ambiguous or unrecognisable input, or all models failed</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <!-- Model fallback -->
       <div class="doc-section">
         <div class="doc-section-label">Reliability</div>
@@ -655,6 +839,270 @@ if (response.ok) {
             <div>
               <div class="output-name">Any Markdown</div>
               <div class="output-desc">Wrap in ```mermaid code fences — works in GitLab, Obsidian, HackMD, and more</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<!-- Molecules Pipeline -->
+      <div class="doc-section">
+        <div class="doc-section-label">Molecules Pipeline</div>
+        <h2 class="doc-section-title">Chemistry — how it works</h2>
+        <p class="doc-text">The Molecules feature follows a different pipeline from the diagram digitiser. Instead of image preprocessing, it starts with a text input and uses Gemini as a chemistry knowledge engine before handing off to RDKit for validated rendering.</p>
+
+        <div class="pipeline-steps">
+
+          <div class="pipeline-step">
+            <div class="pipeline-icon pipeline-icon--1">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M4 11h14M11 4v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="pipeline-content">
+              <div class="pipeline-num">Stage 1</div>
+              <div class="pipeline-title">Formula Interpretation</div>
+              <p class="pipeline-desc">Your input — whether a formula like C6H12O6, a common name like caffeine, or an IUPAC name — is sent to Gemini with a strict prompt asking for a canonical SMILES string plus molecular metadata. Gemini acts as a chemistry knowledge engine here, not a vision model.</p>
+              <div class="pipeline-tech">
+                <span class="tech-tag">Gemini Text</span>
+                <span class="tech-tag">SMILES Generation</span>
+                <span class="tech-tag">JSON Output</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-connector">
+            <div class="pipeline-line"></div>
+            <span class="pipeline-connector-label">SMILES string + metadata</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-icon pipeline-icon--2">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <circle cx="11" cy="11" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="4" cy="6" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="18" cy="6" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="4" cy="16" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="18" cy="16" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 8l2 2M15 8l-2 2M7 14l2-2M15 14l-2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="pipeline-content">
+              <div class="pipeline-num">Stage 2</div>
+              <div class="pipeline-title">RDKit Validation</div>
+              <p class="pipeline-desc">The SMILES string from Gemini is passed to RDKit — an open-source cheminformatics library — which attempts to parse and validate it. If the SMILES is invalid or chemically impossible, RDKit rejects it and the request fails with a clear error rather than silently rendering a wrong structure. This validation step is critical because Gemini occasionally hallucinates SMILES for complex molecules.</p>
+              <div class="pipeline-tech">
+                <span class="tech-tag">RDKit</span>
+                <span class="tech-tag">SMILES Validation</span>
+                <span class="tech-tag">2D Coordinate Generation</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-connector">
+            <div class="pipeline-line"></div>
+            <span class="pipeline-connector-label">validated molecule object</span>
+          </div>
+
+          <div class="pipeline-step">
+            <div class="pipeline-icon pipeline-icon--3">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="8" cy="11" r="1.5" fill="currentColor"/>
+                <circle cx="14" cy="8" r="1.5" fill="currentColor"/>
+                <circle cx="14" cy="14" r="1.5" fill="currentColor"/>
+                <path d="M9.5 11h3M14 9.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="pipeline-content">
+              <div class="pipeline-num">Stage 3</div>
+              <div class="pipeline-title">2D Structure Rendering</div>
+              <p class="pipeline-desc">RDKit computes 2D coordinates for the molecule and renders it as an SVG using its built-in drawing engine. For skeletal style, carbon atoms are implied at bond intersections. For Lewis style, all hydrogens are added explicitly before rendering, showing every atom in the molecule. The SVG is converted to PNG via cairosvg and returned as a base64 data URI.</p>
+              <div class="pipeline-tech">
+                <span class="tech-tag">RDKit MolDraw2D</span>
+                <span class="tech-tag">SVG → PNG</span>
+                <span class="tech-tag">cairosvg</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Molecules Input -->
+      <div class="doc-section">
+        <div class="doc-section-label">Molecules Input</div>
+        <h2 class="doc-section-title">What you can type</h2>
+        <p class="doc-text">The chemistry endpoint accepts three types of input — all handled the same way internally.</p>
+
+        <div class="format-grid">
+          <div class="format-col format-col--yes">
+            <div class="format-col-header">
+              <span class="format-dot format-dot--yes"></span>
+              Works well
+            </div>
+            <ul class="format-list">
+              <li>Molecular formulas — H2O, CH4, C6H12O6</li>
+              <li>Common names — caffeine, aspirin, ethanol</li>
+              <li>Drug names — ibuprofen, paracetamol</li>
+              <li>Simple IUPAC names — ethanoic acid</li>
+              <li>Neurotransmitters — dopamine, serotonin</li>
+              <li>Amino acids — glycine, alanine</li>
+              <li>Simple polymers — polyethylene unit</li>
+              <li>Vitamins — vitamin C, vitamin D</li>
+            </ul>
+          </div>
+          <div class="format-col format-col--no">
+            <div class="format-col-header">
+              <span class="format-dot format-dot--no"></span>
+              Works poorly
+            </div>
+            <ul class="format-list">
+              <li>Very large molecules (500+ atoms)</li>
+              <li>Complex natural products (taxol, vancomycin)</li>
+              <li>Vague descriptions — "a painkiller"</li>
+              <li>Mixtures — "seawater", "blood"</li>
+              <li>Polymers as whole chains</li>
+              <li>Ions without context — "Fe3+"</li>
+              <li>Radicals and reaction intermediates</li>
+              <li>Ambiguous abbreviations — "T" (thymine or threonine?)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="format-specs">
+          <div class="spec-item">
+            <span class="spec-label">Input types</span>
+            <span class="spec-value">Formula · Name · IUPAC</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Max input length</span>
+            <span class="spec-value">200 characters</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Output styles</span>
+            <span class="spec-value">Skeletal · Lewis</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Output format</span>
+            <span class="spec-value">PNG (base64) + SMILES + JSON</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Molecules Tips -->
+      <div class="doc-section">
+        <div class="doc-section-label">Molecules Best Practices</div>
+        <h2 class="doc-section-title">Tips for best results</h2>
+
+        <div class="tips-grid">
+          <div class="tip-card">
+            <div class="tip-icon">🧪</div>
+            <div class="tip-title">Use common names for drugs</div>
+            <div class="tip-desc">Type "aspirin" not "2-acetoxybenzoic acid". Common names give Gemini an unambiguous target and reduce hallucination risk on complex IUPAC strings.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">⚗️</div>
+            <div class="tip-title">Skeletal for complex molecules</div>
+            <div class="tip-desc">For molecules with many atoms, skeletal mode produces a cleaner, more readable diagram. Lewis mode with explicit hydrogens gets very crowded above ~20 heavy atoms.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">🔬</div>
+            <div class="tip-title">Verify with SMILES tab</div>
+            <div class="tip-desc">Always check the SMILES tab after generation. If the structure looks wrong, copy the SMILES into PubChem or MolView to verify before using the image.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">📐</div>
+            <div class="tip-title">Lewis for teaching</div>
+            <div class="tip-desc">Lewis style is best for educational use — it shows every hydrogen explicitly, making bond counting and electron pair identification straightforward for students.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">🔗</div>
+            <div class="tip-title">Use SMILES for further work</div>
+            <div class="tip-desc">Copy the generated SMILES into MolView for a 3D ball-and-stick view, PubChem for full compound data, or Ketcher to edit the structure interactively.</div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon">♻️</div>
+            <div class="tip-title">Retry on wrong structures</div>
+            <div class="tip-desc">If the generated structure looks incorrect, hit Retry — Gemini may return a different SMILES on the next call. Consistent wrong results usually mean the input is ambiguous.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Molecules output -->
+      <div class="doc-section">
+        <div class="doc-section-label">Molecules Output</div>
+        <h2 class="doc-section-title">Using SMILES output</h2>
+        <p class="doc-text">The SMILES string returned by Sketchflow is validated by RDKit and can be used directly in a wide range of chemistry tools.</p>
+
+        <div class="output-grid">
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="7" stroke="var(--accent-2)" stroke-width="1.3"/>
+                <path d="M6 9l2 2 4-4" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">MolView</div>
+              <div class="output-desc">Paste SMILES for instant 2D + 3D ball-and-stick view at molview.org</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="2" width="14" height="14" rx="3" stroke="var(--accent-2)" stroke-width="1.3"/>
+                <path d="M5 9h8M5 6h5M5 12h6" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">PubChem</div>
+              <div class="output-desc">Search SMILES for full compound data, bioactivity, and safety info</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M4 4l5 5-5 5M10 14h4" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">Ketcher</div>
+              <div class="output-desc">Load SMILES into the interactive editor to modify the structure</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M9 2v14M2 9h14" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">RDKit (Python)</div>
+              <div class="output-desc">Use the SMILES string directly in your own RDKit scripts for further analysis</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="4" width="14" height="10" rx="2" stroke="var(--accent-2)" stroke-width="1.3"/>
+                <path d="M6 8h6M6 11h4" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">ChemDraw</div>
+              <div class="output-desc">Import SMILES via Edit → Paste Special for professional publication-grade diagrams</div>
+            </div>
+          </div>
+          <div class="output-item">
+            <div class="output-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M3 3h12v12H3z" stroke="var(--accent-2)" stroke-width="1.3" rx="2"/>
+                <path d="M6 9h6M9 6v6" stroke="var(--accent-2)" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="output-name">OpenBabel</div>
+              <div class="output-desc">Convert SMILES to MOL, SDF, InChI, or any other chemistry format</div>
             </div>
           </div>
         </div>
