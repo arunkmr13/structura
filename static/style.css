@@ -22,6 +22,57 @@
   --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* ── Light theme ───────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:          #f8f8fc;
+  --bg-2:        #ffffff;
+  --bg-3:        #f0f0f6;
+  --border:      rgba(0,0,0,0.08);
+  --border-2:    rgba(0,0,0,0.14);
+  --text:        #111118;
+  --text-2:      #4a4a5e;
+  --text-3:      #9090a8;
+  --accent:      #6c5ce7;
+  --accent-2:    #5a4bd1;
+  --accent-glow: rgba(108,92,231,0.2);
+  --success:     #00b894;
+  --warning:     #e17055;
+  --error:       #d63031;
+}
+
+[data-theme="light"] .bg-grid {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+}
+
+[data-theme="light"] .bg-grid::after {
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,92,231,0.08) 0%, transparent 70%);
+}
+
+[data-theme="light"] .header {
+  background: rgba(248,248,252,0.85);
+}
+
+[data-theme="light"] .diagram-wrap {
+  background: #f8f8fc;
+  border: 1px solid var(--border);
+}
+
+[data-theme="light"] .mol-image-wrap {
+  background: #f8f8fc;
+  border: 1px solid var(--border);
+}
+
+[data-theme="light"] .code-block {
+  color: #3a3a5c;
+}
+
+[data-theme="light"] .theme-label-dark { display: none !important; }
+[data-theme="light"] .theme-label-light { display: inline !important; }
+[data-theme="light"] .icon-moon { display: none !important; }
+[data-theme="light"] .icon-sun  { display: block !important; }
+
 /* ── Reset ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -124,6 +175,33 @@ body {
   color: var(--accent-2);
   border: 1px solid rgba(124,109,250,0.3);
   text-transform: uppercase;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem 0.3rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--bg-3);
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: rgba(124,109,250,0.08);
+}
+
+.theme-toggle-label {
+  letter-spacing: 0.01em;
 }
 
 /* ── Hero ──────────────────────────────────────────────── */

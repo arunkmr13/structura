@@ -1,3 +1,35 @@
+// ── Theme toggle ──────────────────────────────────────────
+const themeToggle    = document.getElementById('theme-toggle');
+const labelDark      = themeToggle.querySelector('.theme-label-dark');
+const labelLight     = themeToggle.querySelector('.theme-label-light');
+const iconMoon       = themeToggle.querySelector('.icon-moon');
+const iconSun        = themeToggle.querySelector('.icon-sun');
+const savedTheme     = localStorage.getItem('sketchflow-theme') || 'dark';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  if (theme === 'light') {
+    labelDark.style.display  = 'none';
+    labelLight.style.display = 'inline';
+    iconMoon.style.display   = 'none';
+    iconSun.style.display    = 'block';
+  } else {
+    labelDark.style.display  = 'inline';
+    labelLight.style.display = 'none';
+    iconMoon.style.display   = 'block';
+    iconSun.style.display    = 'none';
+  }
+}
+
+applyTheme(savedTheme);
+
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('sketchflow-theme', next);
+  applyTheme(next);
+});
+
 // ── Mermaid init ─────────────────────────────────────────
 mermaid.initialize({
   startOnLoad: false,
