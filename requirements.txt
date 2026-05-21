@@ -6,3 +6,5 @@ Pillow
 google-genai
 python-dotenv
 jinja2
+rdkit
+cairosvg

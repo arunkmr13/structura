@@ -32,6 +32,7 @@
     </div>
     <nav class="nav-pills">
       <span class="pill pill--active" data-page="digitise">Digitise</span>
+      <span class="pill" data-page="molecules">Molecules</span>
       <span class="pill" data-page="api">API</span>
       <span class="pill" data-page="docs">Docs</span>
     </nav>
@@ -705,6 +706,155 @@ if (response.ok) {
       </div>
 
     </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- PAGE: MOLECULES                                         -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="page-molecules" style="display:none">
+
+    <section class="hero hero--page">
+      <div class="hero-eyebrow"><span class="dot-pulse"></span>Powered by RDKit + Gemini</div>
+      <h1 class="hero-title">
+        Visualise any
+        <span class="hero-accent">molecule</span>
+      </h1>
+      <p class="hero-sub">Type a chemical formula or name — get back a clean 2D structural diagram with bond information and molecular metadata.</p>
+    </section>
+
+    <main class="workspace">
+
+      <!-- Left panel: Input -->
+      <div class="panel panel--upload">
+
+        <!-- Formula input -->
+        <div class="formula-input-wrap">
+          <label class="formula-label">Chemical formula or name</label>
+          <div class="formula-input-row">
+            <input
+              type="text"
+              id="formula-input"
+              class="formula-input"
+              placeholder="e.g. H2O, CH4, caffeine, glucose..."
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </div>
+          <p class="formula-hint">Try: <span class="formula-example" data-formula="H2O">H2O</span>, <span class="formula-example" data-formula="C6H12O6">C6H12O6</span>, <span class="formula-example" data-formula="caffeine">caffeine</span>, <span class="formula-example" data-formula="ethanol">ethanol</span>, <span class="formula-example" data-formula="aspirin">aspirin</span></p>
+        </div>
+
+        <!-- Style selector -->
+        <div class="style-selector">
+          <label class="formula-label">Diagram style</label>
+          <div class="style-options">
+            <label class="style-option style-option--active" data-style="skeletal">
+              <input type="radio" name="mol-style" value="skeletal" checked hidden>
+              <div class="style-option-icon">⬡</div>
+              <div>
+                <div class="style-option-name">Skeletal</div>
+                <div class="style-option-desc">Bonds only, carbons implied</div>
+              </div>
+            </label>
+            <label class="style-option" data-style="lewis">
+              <input type="radio" name="mol-style" value="lewis" hidden>
+              <div class="style-option-icon">⬤</div>
+              <div>
+                <div class="style-option-name">Lewis</div>
+                <div class="style-option-desc">All atoms explicit with H</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Generate button -->
+        <button class="btn-digitise" id="generate-btn">
+          <span id="gen-btn-text">Generate</span>
+          <svg id="gen-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="btn-spinner" id="gen-btn-spinner" style="display:none"></div>
+        </button>
+
+        <!-- Stages -->
+        <div class="stages" id="mol-stages" style="display:none">
+          <div class="stage" id="mol-stage-1"><div class="stage-dot"></div><span>Interpreting formula</span></div>
+          <div class="stage" id="mol-stage-2"><div class="stage-dot"></div><span>Generating SMILES</span></div>
+          <div class="stage" id="mol-stage-3"><div class="stage-dot"></div><span>Rendering structure</span></div>
+        </div>
+
+      </div>
+
+      <!-- Right panel: Output -->
+      <div class="panel panel--output">
+
+        <!-- Empty state -->
+        <div class="empty-state" id="mol-empty-state">
+          <div class="mol-empty-icon">⬡</div>
+          <p class="empty-text">Your molecule will appear here</p>
+        </div>
+
+        <!-- Result -->
+        <div class="result" id="mol-result" style="display:none">
+
+          <!-- Metadata bar -->
+          <div class="meta-bar" id="mol-meta-bar"></div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="mol-tab tab tab--active" data-mol-tab="structure">Structure</button>
+            <button class="mol-tab tab" data-mol-tab="info">Molecule Info</button>
+            <button class="mol-tab tab" data-mol-tab="smiles">SMILES</button>
+          </div>
+
+          <!-- Tab: Structure -->
+          <div class="mol-tab-content mol-tab-content--active" id="mol-tab-structure">
+            <div class="mol-image-wrap">
+              <img id="mol-image" src="" alt="Molecular structure" class="mol-image">
+            </div>
+          </div>
+
+          <!-- Tab: Info -->
+          <div class="mol-tab-content" id="mol-tab-info">
+            <div class="mol-info-grid" id="mol-info-grid"></div>
+          </div>
+
+          <!-- Tab: SMILES -->
+          <div class="mol-tab-content" id="mol-tab-smiles">
+            <div class="code-wrap">
+              <pre id="smiles-display" class="code-block"></pre>
+            </div>
+            <p class="smiles-note">SMILES (Simplified Molecular Input Line Entry System) is a notation that describes molecular structure as a text string. Paste it into <a href="https://molview.org" target="_blank">MolView</a> for 3D view, <a href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank">PubChem</a> for compound data, or <a href="https://lifescience.opensource.epam.com/ketcher/demo/" target="_blank">Ketcher</a> to edit interactively.</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="actions">
+            <button class="action-btn" id="copy-smiles-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M2 10V2h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Copy SMILES
+            </button>
+            <button class="action-btn" id="download-mol-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 2v7M7 9L4.5 6.5M7 9L9.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+              Download PNG
+            </button>
+            <button class="action-btn action-btn--ghost" id="mol-retry-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 7C1 3.686 3.686 1 7 1s6 2.686 6 6-2.686 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                <path d="M1 4V7H4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Retry
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
   </div>
 
   <!-- Toast -->

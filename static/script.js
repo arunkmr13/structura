@@ -6,7 +6,7 @@ mermaid.initialize({
 });
 
 // ── Page navigation ──────────────────────────────────────
-const pages = ['digitise', 'api', 'docs'];
+const pages = ['digitise', 'molecules', 'api', 'docs'];
 
 function showPage(name) {
   pages.forEach(p => {
@@ -270,4 +270,193 @@ downloadBtn.addEventListener('click', () => {
   a.click();
   URL.revokeObjectURL(url);
   showToast('Downloaded diagram.md', 'success');
+});
+
+// ── Molecules page ────────────────────────────────────────
+const formulaInput   = document.getElementById('formula-input');
+const generateBtn    = document.getElementById('generate-btn');
+const genBtnText     = document.getElementById('gen-btn-text');
+const genBtnArrow    = document.getElementById('gen-btn-arrow');
+const genBtnSpinner  = document.getElementById('gen-btn-spinner');
+const molStages      = document.getElementById('mol-stages');
+const molStage1      = document.getElementById('mol-stage-1');
+const molStage2      = document.getElementById('mol-stage-2');
+const molStage3      = document.getElementById('mol-stage-3');
+const molEmptyState  = document.getElementById('mol-empty-state');
+const molResult      = document.getElementById('mol-result');
+const molMetaBar     = document.getElementById('mol-meta-bar');
+const molImage       = document.getElementById('mol-image');
+const molInfoGrid    = document.getElementById('mol-info-grid');
+const smilesDisplay  = document.getElementById('smiles-display');
+const copySmilesBtnEl = document.getElementById('copy-smiles-btn');
+const downloadMolBtn = document.getElementById('download-mol-btn');
+const molRetryBtn    = document.getElementById('mol-retry-btn');
+
+let lastSmiles = '';
+let lastImageData = '';
+
+// Example pills
+document.querySelectorAll('.formula-example').forEach(el => {
+  el.addEventListener('click', () => {
+    formulaInput.value = el.dataset.formula;
+    formulaInput.focus();
+  });
+});
+
+// Style selector
+document.querySelectorAll('.style-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.style-option').forEach(o => o.classList.remove('style-option--active'));
+    opt.classList.add('style-option--active');
+    opt.querySelector('input').checked = true;
+  });
+});
+
+// Mol tabs
+document.querySelectorAll('.mol-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mol-tab').forEach(t => t.classList.remove('tab--active'));
+    document.querySelectorAll('.mol-tab-content').forEach(c => c.classList.remove('mol-tab-content--active'));
+    tab.classList.add('tab--active');
+    document.getElementById('mol-tab-' + tab.dataset.molTab).classList.add('mol-tab-content--active');
+  });
+});
+
+// Stage helpers
+function setMolStage(stage) {
+  molStage1.className = stage === 1 ? 'stage active' : stage > 1 ? 'stage done' : 'stage';
+  molStage2.className = stage === 2 ? 'stage active' : stage > 2 ? 'stage done' : 'stage';
+  molStage3.className = stage === 3 ? 'stage active' : stage > 3 ? 'stage done' : 'stage';
+}
+
+function allMolStagesDone() {
+  [molStage1, molStage2, molStage3].forEach(s => s.className = 'stage done');
+}
+
+// Build meta bar
+function buildMolMetaBar(meta, model) {
+  molMetaBar.innerHTML = `
+    <span class="meta-chip meta-chip--type">${meta.molecular_formula || 'molecule'}</span>
+    ${meta.molecular_weight ? `<span class="meta-chip">${meta.molecular_weight}</span>` : ''}
+    ${meta.atom_count ? `<span class="meta-chip">${meta.atom_count} atoms</span>` : ''}
+    ${meta.bond_count ? `<span class="meta-chip">${meta.bond_count} bonds</span>` : ''}
+    <span class="meta-chip">${model}</span>
+  `;
+}
+
+// Build info grid
+function buildMolInfoGrid(meta) {
+  const fields = [
+    { label: 'IUPAC Name',         value: meta.iupac_name,         wide: false },
+    { label: 'Common Name',        value: meta.common_name,        wide: false },
+    { label: 'Molecular Formula',  value: meta.molecular_formula,  wide: false },
+    { label: 'Molecular Weight',   value: meta.molecular_weight,   wide: false },
+    { label: 'Atom Count',         value: meta.atom_count,         wide: false },
+    { label: 'Bond Count',         value: meta.bond_count,         wide: false },
+    { label: 'Description',        value: meta.description,        wide: true  },
+  ];
+
+  molInfoGrid.innerHTML = fields
+    .filter(f => f.value !== null && f.value !== undefined)
+    .map(f => `
+      <div class="mol-info-item ${f.wide ? 'mol-info-item--wide' : ''}">
+        <div class="mol-info-label">${f.label}</div>
+        <div class="mol-info-value">${f.value}</div>
+      </div>
+    `).join('');
+}
+
+// Generate
+async function doGenerate() {
+  const formula = formulaInput.value.trim();
+  if (!formula) {
+    showToast('Please enter a formula or molecule name', 'error');
+    formulaInput.focus();
+    return;
+  }
+
+  const style = document.querySelector('input[name="mol-style"]:checked').value;
+
+  // UI loading state
+  genBtnText.textContent = 'Generating...';
+  genBtnArrow.style.display = 'none';
+  genBtnSpinner.style.display = 'block';
+  generateBtn.disabled = true;
+  molStages.style.display = 'flex';
+  molEmptyState.style.display = 'none';
+  molResult.style.display = 'none';
+
+  setMolStage(1);
+  await new Promise(r => setTimeout(r, 500));
+  setMolStage(2);
+
+  try {
+    const res = await fetch('/chemistry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formula, style })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Something went wrong');
+
+    setMolStage(3);
+    await new Promise(r => setTimeout(r, 300));
+
+    lastSmiles = data.smiles;
+    lastImageData = data.image;
+
+    // Populate outputs
+    molImage.src = data.image;
+    smilesDisplay.textContent = data.smiles;
+    buildMolMetaBar(data.metadata, data.model_used);
+    buildMolInfoGrid(data.metadata);
+
+    allMolStagesDone();
+    molResult.style.display = 'flex';
+
+    // Reset to structure tab
+    document.querySelectorAll('.mol-tab').forEach(t => t.classList.remove('tab--active'));
+    document.querySelectorAll('.mol-tab-content').forEach(c => c.classList.remove('mol-tab-content--active'));
+    document.querySelector('[data-mol-tab="structure"]').classList.add('tab--active');
+    document.getElementById('mol-tab-structure').classList.add('mol-tab-content--active');
+
+    showToast('Molecule rendered successfully', 'success');
+
+  } catch (err) {
+    [molStage1, molStage2, molStage3].forEach(s => {
+      if (s.classList.contains('active')) s.className = 'stage';
+    });
+    showToast(err.message || 'Generation failed', 'error');
+    molEmptyState.style.display = 'flex';
+  } finally {
+    genBtnText.textContent = 'Generate';
+    genBtnArrow.style.display = 'block';
+    genBtnSpinner.style.display = 'none';
+    generateBtn.disabled = false;
+  }
+}
+
+generateBtn.addEventListener('click', doGenerate);
+molRetryBtn.addEventListener('click', doGenerate);
+
+// Enter key to generate
+formulaInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doGenerate();
+});
+
+// Copy SMILES
+copySmilesBtnEl.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(lastSmiles);
+  showToast('SMILES copied', 'success');
+});
+
+// Download PNG
+downloadMolBtn.addEventListener('click', () => {
+  if (!lastImageData) return;
+  const a = document.createElement('a');
+  a.href = lastImageData;
+  a.download = 'molecule.png';
+  a.click();
+  showToast('Downloaded molecule.png', 'success');
 });

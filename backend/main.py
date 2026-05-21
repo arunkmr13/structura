@@ -1,3 +1,4 @@
+from backend.chemistry import process_formula
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -71,3 +72,36 @@ async def digitise(request: Request, file: UploadFile = File(...)):
         "raw": diagram_data,
         "model_used": model_used
     })
+
+from pydantic import BaseModel
+
+class FormulaRequest(BaseModel):
+    formula: str
+    style: str = "skeletal"
+
+@app.post("/chemistry")
+async def chemistry(request: Request, body: FormulaRequest):
+    ip = request.client.host
+    if is_rate_limited(ip):
+        logger.warning(f"Rate limit hit | ip={ip}")
+        raise HTTPException(status_code=429, detail="Too many requests. Please wait a moment.")
+
+    formula = body.formula.strip()
+    if not formula:
+        raise HTTPException(status_code=400, detail="Formula cannot be empty")
+
+    if len(formula) > 200:
+        raise HTTPException(status_code=400, detail="Formula too long — max 200 characters")
+
+    logger.info(f"Chemistry request | ip={ip} | formula={formula} | style={body.style}")
+
+    try:
+        result = process_formula(formula, body.style)
+        logger.info(f"Chemistry success | ip={ip} | model={result['model_used']} | smiles={result['smiles']}")
+        return JSONResponse(result)
+    except ValueError as e:
+        logger.error(f"Chemistry validation error | ip={ip} | error={str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Chemistry failed | ip={ip} | error={str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process formula: {str(e)}")
