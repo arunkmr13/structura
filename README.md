@@ -156,7 +156,7 @@ GEMINI_API_KEY=your-gemini-api-key-here
 python -m uvicorn backend.main:app --reload --port 8000
 ```
 
-Open [http://localhost:8000](http://localhost:8000)
+Open [https://structura-kw47.onrender.com](https://structura-kw47.onrender.com)
 
 ---
 
@@ -166,7 +166,7 @@ Open [http://localhost:8000](http://localhost:8000)
 docker compose up --build
 ```
 
-Open [http://localhost:8000](http://localhost:8000)
+Open [https://structura-kw47.onrender.com](https://structura-kw47.onrender.com)
 
 ---
 
@@ -184,7 +184,7 @@ Body: file (JPEG / PNG / WebP, max 5MB)
 
 **curl**
 ```bash
-curl -X POST http://localhost:8000/digitise \
+curl -X POST https://structura-kw47.onrender.com/digitise \
   -F "file=@whiteboard.jpg"
 ```
 
@@ -194,7 +194,7 @@ import requests
 
 with open("whiteboard.jpg", "rb") as f:
     response = requests.post(
-        "http://localhost:8000/digitise",
+        "https://structura-kw47.onrender.com/digitise",
         files={"file": f}
     )
 
@@ -230,7 +230,7 @@ Body: { "formula": "caffeine", "style": "skeletal" }
 
 **curl**
 ```bash
-curl -X POST http://localhost:8000/chemistry \
+curl -X POST https://structura-kw47.onrender.com/chemistry \
   -H "Content-Type: application/json" \
   -d '{"formula": "aspirin", "style": "skeletal"}'
 ```
@@ -240,7 +240,7 @@ curl -X POST http://localhost:8000/chemistry \
 import requests, base64
 
 response = requests.post(
-    "http://localhost:8000/chemistry",
+    "https://structura-kw47.onrender.com/chemistry",
     json={"formula": "aspirin", "style": "skeletal"}
 )
 
