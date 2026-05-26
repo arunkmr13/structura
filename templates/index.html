@@ -260,7 +260,7 @@
             <span>curl</span>
             <button class="copy-inline-btn" data-copy-id="code-curl">Copy</button>
           </div>
-          <pre class="code-block">curl -X POST http://localhost:8000/digitise \
+          <pre class="code-block">curl -X POST https://structura-kw47.onrender.com/digitise \
   -F "file=@/path/to/whiteboard.jpg"</pre>
         </div>
 
@@ -273,7 +273,7 @@
 
 with open("whiteboard.jpg", "rb") as f:
     response = requests.post(
-        "http://localhost:8000/digitise",
+        "https://structura-kw47.onrender.com/digitise",
         files={"file": ("whiteboard.jpg", f, "image/jpeg")}
     )
 
@@ -296,7 +296,7 @@ else:
           <pre class="code-block">const formData = new FormData();
 formData.append("file", fileInput.files[0]);
 
-const response = await fetch("http://localhost:8000/digitise", {
+const response = await fetch("https://structura-kw47.onrender.com/digitise", {
   method: "POST",
   body: formData,
 });
@@ -436,12 +436,12 @@ if (response.ok) {
             <button class="copy-inline-btn" data-copy-id="code-chem-curl">Copy</button>
           </div>
           <pre class="code-block"># Skeletal diagram of caffeine
-curl -X POST http://localhost:8000/chemistry \
+curl -X POST https://structura-kw47.onrender.com/chemistry \
   -H "Content-Type: application/json" \
   -d '{"formula": "caffeine", "style": "skeletal"}'
 
 # Lewis diagram of water
-curl -X POST http://localhost:8000/chemistry \
+curl -X POST https://structura-kw47.onrender.com/chemistry \
   -H "Content-Type: application/json" \
   -d '{"formula": "H2O", "style": "lewis"}'</pre>
         </div>
@@ -455,7 +455,7 @@ curl -X POST http://localhost:8000/chemistry \
 import base64
 
 response = requests.post(
-    "http://localhost:8000/chemistry",
+    "https://structura-kw47.onrender.com/chemistry",
     json={"formula": "aspirin", "style": "skeletal"}
 )
 
@@ -484,7 +484,7 @@ else:
             <span>JavaScript</span>
             <button class="copy-inline-btn" data-copy-id="code-chem-js">Copy</button>
           </div>
-          <pre class="code-block">const response = await fetch("http://localhost:8000/chemistry", {
+          <pre class="code-block">const response = await fetch("https://structura-kw47.onrender.com/chemistry", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ formula: "glucose", style: "skeletal" }),
