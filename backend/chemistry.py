@@ -112,24 +112,48 @@ def smiles_to_image(smiles: str, style: str = "skeletal") -> str:
     if mol is None:
         raise ValueError(f"Invalid SMILES string: {smiles}")
 
-    # Add hydrogens for Lewis style
     if style == "lewis":
         mol = Chem.AddHs(mol)
         AllChem.Compute2DCoords(mol)
     else:
         AllChem.Compute2DCoords(mol)
 
-    # Draw
+    # Try PNG directly via MolDraw2DCairo first
+    try:
+        from rdkit.Chem.Draw import rdMolDraw2D
+        drawer = rdMolDraw2D.MolDraw2DCairo(600, 400)
+        drawer.drawOptions().addStereoAnnotation = True
+        if style == "lewis":
+            drawer.drawOptions().explicitMethyl = True
+        drawer.DrawMolecule(mol)
+        drawer.FinishDrawing()
+        png_bytes = drawer.GetDrawingText()
+        return "data:image/png;base64," + base64.b64encode(png_bytes).decode()
+    except Exception:
+        pass
+
+    # Fallback: SVG via MolDraw2DSVG then convert with cairosvg
+    try:
+        drawer = rdMolDraw2D.MolDraw2DSVG(600, 400)
+        drawer.drawOptions().addStereoAnnotation = True
+        if style == "lewis":
+            drawer.drawOptions().explicitMethyl = True
+        drawer.DrawMolecule(mol)
+        drawer.FinishDrawing()
+        svg = drawer.GetDrawingText()
+        import cairosvg
+        png_bytes = cairosvg.svg2png(bytestring=svg.encode(), output_width=600, output_height=400)
+        return "data:image/png;base64," + base64.b64encode(png_bytes).decode()
+    except Exception:
+        pass
+
+    # Last resort: return SVG
     drawer = rdMolDraw2D.MolDraw2DSVG(600, 400)
     drawer.drawOptions().addStereoAnnotation = True
-    drawer.drawOptions().addAtomIndices = False
-
-    if style == "lewis":
-        drawer.drawOptions().explicitMethyl = True
-
     drawer.DrawMolecule(mol)
     drawer.FinishDrawing()
     svg = drawer.GetDrawingText()
+    return "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
 
     # Convert SVG to PNG via cairosvg
     try:

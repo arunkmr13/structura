@@ -498,23 +498,45 @@ copySmilesBtnEl.addEventListener('click', async () => {
 downloadMolBtn.addEventListener('click', () => {
   if (!lastImageData) return;
 
-  const a = document.createElement('a');
-
   if (lastImageData.startsWith('data:image/png')) {
-    // Real PNG — download directly
+    // Real PNG from backend — download directly
+    const a = document.createElement('a');
     a.href = lastImageData;
     a.download = 'molecule.png';
     a.click();
     showToast('Downloaded molecule.png', 'success');
-  } else if (lastImageData.startsWith('data:image/svg+xml')) {
-    // SVG fallback — download as .svg instead
-    a.href = lastImageData;
-    a.download = 'molecule.svg';
-    a.click();
-    showToast('Downloaded molecule.svg', 'success');
-  }
 
-  URL.revokeObjectURL(a.href);
+  } else {
+    // SVG fallback — convert to PNG via canvas in browser
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.naturalWidth  || 600;
+      canvas.height = img.naturalHeight || 400;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'molecule.png';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Downloaded molecule.png', 'success');
+      }, 'image/png');
+    };
+    img.onerror = () => {
+      // Last resort — save as SVG
+      const a = document.createElement('a');
+      a.href = lastImageData;
+      a.download = 'molecule.svg';
+      a.click();
+      showToast('Downloaded molecule.svg', 'success');
+    };
+    img.src = lastImageData;
+  }
 });
 
 // ── 3D Viewer ─────────────────────────────────────────────
