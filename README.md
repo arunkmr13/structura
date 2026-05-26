@@ -2,12 +2,12 @@
 
 > A multi-feature diagram and chemistry visualisation tool — turn hand-drawn sketches into Mermaid diagrams, and chemical formulas into 2D molecular structures.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.136-green?style=flat-square)
-![Gemini](https://img.shields.io/badge/Gemini-Vision-orange?style=flat-square)
-![RDKit](https://img.shields.io/badge/RDKit-2026-red?style=flat-square)
-![Docker](https://img.shields.io/badge/Docker-ready-blue?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.136-green?style=flat-square)](https://fastapi.tiangolo.com)
+[![Gemini](https://img.shields.io/badge/Gemini-Vision-orange?style=flat-square)](https://aistudio.google.com)
+[![RDKit](https://img.shields.io/badge/RDKit-2026-red?style=flat-square)](https://rdkit.org)
+[![Docker](https://img.shields.io/badge/Docker-ready-blue?style=flat-square)](https://docker.com)
+[![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE)
 
 ---
 
@@ -27,18 +27,37 @@
 
 ## Demo
 
+> 💤 **Note:** The live instance runs on Render's free tier and sleeps after inactivity. The first request may take ~30 seconds to cold-start — subsequent requests are fast.
+
 ### Whiteboard Digitiser
-| Input | Output |
-|---|---|
-| Hand-drawn bubble sort flowchart | 9 nodes, 11 edges, correct loop structure |
-| Multi-lane approval workflow | 23 nodes, full Yes/No branching |
+
+Upload a photo of any hand-drawn diagram and get back Mermaid code with a live rendered preview.
+
+**Input → Mermaid output**
+
+![Digitise input and output](docs/screenshots/digitise-input-output.png)
+
+**Generated Mermaid code**
+
+![Mermaid code output](docs/screenshots/mermaid-code.png)
+
+**Live rendered diagram**
+
+![Mermaid live render](docs/screenshots/mermaid-live-render.png)
+
+---
 
 ### Molecule Visualiser
-| Input | Output |
-|---|---|
-| `adrenaline` | C9H13NO3, 183.20 g/mol, skeletal + Lewis |
-| `caffeine` | C8H10N4O2, 194.19 g/mol, SMILES validated |
-| `SO4^2-` | Sulfate ion, `[O-]S(=O)(=O)[O-]` |
+
+Type any formula, common name, or IUPAC name and get a 2D structural diagram, SMILES, and metadata.
+
+**2D skeletal structure — caffeine**
+
+![2D caffeine structure](docs/screenshots/molecules-2d-caffeine.png)
+
+**3D view via MolView (copy SMILES → MolView)**
+
+![3D caffeine via MolView](docs/screenshots/molecules-3d-caffeine.png)
 
 ---
 
@@ -70,22 +89,22 @@
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Backend | Python 3.11, FastAPI |
-| Image Processing | OpenCV, Pillow |
-| Chemistry | RDKit, cairosvg |
-| Vision / Text AI | Google Gemini (google-genai SDK) |
-| Diagram Rendering | Mermaid.js v10 |
-| Frontend | Vanilla HTML/CSS/JS — dark/light theme |
-| Container | Docker, Docker Compose |
+| Layer             | Technology                             |
+| ----------------- | -------------------------------------- |
+| Backend           | Python 3.11, FastAPI                   |
+| Image Processing  | OpenCV, Pillow                         |
+| Chemistry         | RDKit, cairosvg                        |
+| Vision / Text AI  | Google Gemini (google-genai SDK)       |
+| Diagram Rendering | Mermaid.js v10                         |
+| Frontend          | Vanilla HTML/CSS/JS — dark/light theme |
+| Container         | Docker, Docker Compose                 |
 
 ---
 
 ## Project Structure
 
 ```
-whiteboard-digitiser/
+structura/
 ├── backend/
 │   ├── __init__.py
 │   ├── main.py           # FastAPI app, endpoints, rate limiting, logging
@@ -99,6 +118,8 @@ whiteboard-digitiser/
 │   └── style.css         # Dark/light SaaS theme, CSS variables, responsive
 ├── templates/
 │   └── index.html        # Four-page SPA — Digitise, Molecules, API, Docs
+├── docs/
+│   └── screenshots/      # Demo images used in this README
 ├── .env.example
 ├── Dockerfile
 ├── docker-compose.yml
@@ -120,8 +141,8 @@ whiteboard-digitiser/
 **1. Clone the repo**
 
 ```bash
-git clone https://github.com/arunkmr13/whiteboard-digitiser.git
-cd whiteboard-digitiser
+git clone https://github.com/arunkmr13/structura.git
+cd structura
 ```
 
 **2. Create a virtual environment**
@@ -156,7 +177,7 @@ GEMINI_API_KEY=your-gemini-api-key-here
 python -m uvicorn backend.main:app --reload --port 8000
 ```
 
-Open [https://structura-kw47.onrender.com](https://structura-kw47.onrender.com)
+Open http://localhost:8000
 
 ---
 
@@ -166,7 +187,7 @@ Open [https://structura-kw47.onrender.com](https://structura-kw47.onrender.com)
 docker compose up --build
 ```
 
-Open [https://structura-kw47.onrender.com](https://structura-kw47.onrender.com)
+Open http://localhost:8000
 
 ---
 
@@ -177,18 +198,21 @@ Open [https://structura-kw47.onrender.com](https://structura-kw47.onrender.com)
 Accepts a whiteboard image and returns Mermaid code + structured JSON.
 
 **Request**
+
 ```
 Content-Type: multipart/form-data
 Body: file (JPEG / PNG / WebP, max 5MB)
 ```
 
 **curl**
+
 ```bash
 curl -X POST https://structura-kw47.onrender.com/digitise \
   -F "file=@whiteboard.jpg"
 ```
 
 **Python**
+
 ```python
 import requests
 
@@ -204,6 +228,7 @@ print(data["model_used"])
 ```
 
 **Response**
+
 ```json
 {
   "mermaid": "graph TD\n    A[\"Start\"] --> B[\"Process\"]...",
@@ -223,12 +248,14 @@ print(data["model_used"])
 Accepts a chemical formula or name and returns a 2D structural diagram.
 
 **Request**
+
 ```
 Content-Type: application/json
 Body: { "formula": "caffeine", "style": "skeletal" }
 ```
 
 **curl**
+
 ```bash
 curl -X POST https://structura-kw47.onrender.com/chemistry \
   -H "Content-Type: application/json" \
@@ -236,6 +263,7 @@ curl -X POST https://structura-kw47.onrender.com/chemistry \
 ```
 
 **Python**
+
 ```python
 import requests, base64
 
@@ -254,6 +282,7 @@ open("molecule.png", "wb").write(png)
 ```
 
 **Response**
+
 ```json
 {
   "image": "data:image/png;base64,...",
@@ -275,12 +304,12 @@ open("molecule.png", "wb").write(png)
 
 ## Error Codes
 
-| Code | Endpoint | Meaning |
-|---|---|---|
-| 400 | Both | Invalid file type, file too large, empty formula, invalid SMILES |
-| 429 | Both | Rate limit exceeded — 10 requests / 60 seconds per IP |
-| 500 | Both | Extraction failed or all Gemini models exhausted |
-| 504 | /digitise | Gemini API timed out |
+| Code | Endpoint  | Meaning                                                          |
+| ---- | --------- | ---------------------------------------------------------------- |
+| 400  | Both      | Invalid file type, file too large, empty formula, invalid SMILES |
+| 429  | Both      | Rate limit exceeded — 10 requests / 60 seconds per IP            |
+| 500  | Both      | Extraction failed or all Gemini models exhausted                 |
+| 504  | /digitise | Gemini API timed out                                             |
 
 ---
 
