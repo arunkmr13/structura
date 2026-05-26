@@ -41,6 +41,32 @@ Rules:
 - Never guess — if unsure about the SMILES, return an error
 """
 
+def smiles_to_3d_sdf(smiles: str) -> str:
+    """Generate 3D coordinates and return as SDF/MOL block."""
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid SMILES: {smiles}")
+
+    # Add hydrogens for 3D
+    mol = Chem.AddHs(mol)
+
+    # Generate 3D coordinates using ETKDGv3
+    result = AllChem.EmbedMolecule(mol, AllChem.ETKDGv3())
+    if result == -1:
+        # Fallback to basic ETKDG
+        result = AllChem.EmbedMolecule(mol, AllChem.ETKDG())
+    if result == -1:
+        raise ValueError("Could not generate 3D coordinates")
+
+    # Optimise geometry with MMFF force field
+    try:
+        AllChem.MMFFOptimizeMolecule(mol, maxIters=2000)
+    except Exception:
+        pass  # Use unoptimised coordinates if MMFF fails
+
+    return Chem.MolToMolBlock(mol)
+
+
 def _call_gemini(prompt_text: str) -> dict:
     last_error = None
 
@@ -117,7 +143,7 @@ def smiles_to_image(smiles: str, style: str = "skeletal") -> str:
 
 
 def process_formula(formula: str, style: str = "skeletal") -> dict:
-    """Full pipeline: formula → Gemini → SMILES → image."""
+    """Full pipeline: formula → Gemini → SMILES → 2D image + 3D SDF."""
 
     # Get molecule data from Gemini
     prompt = f"{FORMULA_PROMPT}\n\nInput: {formula}"
@@ -132,20 +158,27 @@ def process_formula(formula: str, style: str = "skeletal") -> dict:
     if mol is None:
         raise ValueError(f"Generated SMILES is invalid: {smiles}")
 
-    # Generate image
+    # Generate 2D image
     image_data = smiles_to_image(smiles, style)
+
+    # Generate 3D SDF
+    try:
+        sdf_data = smiles_to_3d_sdf(smiles)
+    except Exception:
+        sdf_data = None
 
     return {
         "image": image_data,
+        "sdf": sdf_data,
         "smiles": smiles,
         "model_used": model_used,
         "metadata": {
-            "iupac_name":       mol_data.get("iupac_name"),
-            "common_name":      mol_data.get("common_name"),
+            "iupac_name":        mol_data.get("iupac_name"),
+            "common_name":       mol_data.get("common_name"),
             "molecular_formula": mol_data.get("molecular_formula"),
-            "molecular_weight": mol_data.get("molecular_weight"),
-            "bond_count":       mol_data.get("bond_count"),
-            "atom_count":       mol_data.get("atom_count"),
-            "description":      mol_data.get("description"),
+            "molecular_weight":  mol_data.get("molecular_weight"),
+            "bond_count":        mol_data.get("bond_count"),
+            "atom_count":        mol_data.get("atom_count"),
+            "description":       mol_data.get("description"),
         }
     }

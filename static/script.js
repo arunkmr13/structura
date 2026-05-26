@@ -4,7 +4,7 @@ const labelDark      = themeToggle.querySelector('.theme-label-dark');
 const labelLight     = themeToggle.querySelector('.theme-label-light');
 const iconMoon       = themeToggle.querySelector('.icon-moon');
 const iconSun        = themeToggle.querySelector('.icon-sun');
-const savedTheme     = localStorage.getItem('Structura-theme') || 'dark';
+const savedTheme     = localStorage.getItem('structura-theme') || 'dark';
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -26,7 +26,7 @@ applyTheme(savedTheme);
 themeToggle.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('Structura-theme', next);
+  localStorage.setItem('structura-theme', next);
   applyTheme(next);
 });
 
@@ -263,7 +263,6 @@ async function doDigitise() {
     allStagesDone();
     result.style.display = 'flex';
 
-    // Reset to diagram tab
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab--active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('tab-content--active'));
     document.querySelector('[data-tab="diagram"]').classList.add('tab--active');
@@ -304,28 +303,35 @@ downloadBtn.addEventListener('click', () => {
   showToast('Downloaded diagram.md', 'success');
 });
 
-// ── Molecules page ────────────────────────────────────────
-const formulaInput   = document.getElementById('formula-input');
-const generateBtn    = document.getElementById('generate-btn');
-const genBtnText     = document.getElementById('gen-btn-text');
-const genBtnArrow    = document.getElementById('gen-btn-arrow');
-const genBtnSpinner  = document.getElementById('gen-btn-spinner');
-const molStages      = document.getElementById('mol-stages');
-const molStage1      = document.getElementById('mol-stage-1');
-const molStage2      = document.getElementById('mol-stage-2');
-const molStage3      = document.getElementById('mol-stage-3');
-const molEmptyState  = document.getElementById('mol-empty-state');
-const molResult      = document.getElementById('mol-result');
-const molMetaBar     = document.getElementById('mol-meta-bar');
-const molImage       = document.getElementById('mol-image');
-const molInfoGrid    = document.getElementById('mol-info-grid');
-const smilesDisplay  = document.getElementById('smiles-display');
-const copySmilesBtnEl = document.getElementById('copy-smiles-btn');
-const downloadMolBtn = document.getElementById('download-mol-btn');
-const molRetryBtn    = document.getElementById('mol-retry-btn');
+// ── Copy JSON ─────────────────────────────────────────────
+document.getElementById('copy-json-btn').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(jsonDisplay.textContent);
+  showToast('Raw JSON copied', 'success');
+});
 
-let lastSmiles = '';
+// ── Molecules page ────────────────────────────────────────
+const formulaInput    = document.getElementById('formula-input');
+const generateBtn     = document.getElementById('generate-btn');
+const genBtnText      = document.getElementById('gen-btn-text');
+const genBtnArrow     = document.getElementById('gen-btn-arrow');
+const genBtnSpinner   = document.getElementById('gen-btn-spinner');
+const molStages       = document.getElementById('mol-stages');
+const molStage1       = document.getElementById('mol-stage-1');
+const molStage2       = document.getElementById('mol-stage-2');
+const molStage3       = document.getElementById('mol-stage-3');
+const molEmptyState   = document.getElementById('mol-empty-state');
+const molResult       = document.getElementById('mol-result');
+const molMetaBar      = document.getElementById('mol-meta-bar');
+const molImage        = document.getElementById('mol-image');
+const molInfoGrid     = document.getElementById('mol-info-grid');
+const smilesDisplay   = document.getElementById('smiles-display');
+const copySmilesBtnEl = document.getElementById('copy-smiles-btn');
+const downloadMolBtn  = document.getElementById('download-mol-btn');
+const molRetryBtn     = document.getElementById('mol-retry-btn');
+
+let lastSmiles    = '';
 let lastImageData = '';
+let currentSdf    = null;
 
 // Example pills
 document.querySelectorAll('.formula-example').forEach(el => {
@@ -351,6 +357,11 @@ document.querySelectorAll('.mol-tab').forEach(tab => {
     document.querySelectorAll('.mol-tab-content').forEach(c => c.classList.remove('mol-tab-content--active'));
     tab.classList.add('tab--active');
     document.getElementById('mol-tab-' + tab.dataset.molTab).classList.add('mol-tab-content--active');
+
+    // Init 3D viewer when tab is clicked
+    if (tab.dataset.molTab === '3d') {
+      setTimeout(() => init3DViewer(currentSdf), 50);
+    }
   });
 });
 
@@ -398,7 +409,7 @@ function buildMolInfoGrid(meta) {
     `).join('');
 }
 
-// Generate
+// ── Generate ──────────────────────────────────────────────
 async function doGenerate() {
   const formula = formulaInput.value.trim();
   if (!formula) {
@@ -409,7 +420,6 @@ async function doGenerate() {
 
   const style = document.querySelector('input[name="mol-style"]:checked').value;
 
-  // UI loading state
   genBtnText.textContent = 'Generating...';
   genBtnArrow.style.display = 'none';
   genBtnSpinner.style.display = 'block';
@@ -435,8 +445,10 @@ async function doGenerate() {
     setMolStage(3);
     await new Promise(r => setTimeout(r, 300));
 
-    lastSmiles = data.smiles;
+    // Store results
+    lastSmiles    = data.smiles;
     lastImageData = data.image;
+    currentSdf    = data.sdf || null;
 
     // Populate outputs
     molImage.src = data.image;
@@ -472,23 +484,121 @@ async function doGenerate() {
 generateBtn.addEventListener('click', doGenerate);
 molRetryBtn.addEventListener('click', doGenerate);
 
-// Enter key to generate
 formulaInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') doGenerate();
 });
 
-// Copy SMILES
+// ── Copy SMILES ───────────────────────────────────────────
 copySmilesBtnEl.addEventListener('click', async () => {
   await navigator.clipboard.writeText(lastSmiles);
   showToast('SMILES copied', 'success');
 });
 
-// Download PNG
+// ── Download PNG ──────────────────────────────────────────
 downloadMolBtn.addEventListener('click', () => {
   if (!lastImageData) return;
+
   const a = document.createElement('a');
-  a.href = lastImageData;
-  a.download = 'molecule.png';
-  a.click();
-  showToast('Downloaded molecule.png', 'success');
+
+  if (lastImageData.startsWith('data:image/png')) {
+    // Real PNG — download directly
+    a.href = lastImageData;
+    a.download = 'molecule.png';
+    a.click();
+    showToast('Downloaded molecule.png', 'success');
+  } else if (lastImageData.startsWith('data:image/svg+xml')) {
+    // SVG fallback — download as .svg instead
+    a.href = lastImageData;
+    a.download = 'molecule.svg';
+    a.click();
+    showToast('Downloaded molecule.svg', 'success');
+  }
+
+  URL.revokeObjectURL(a.href);
+});
+
+// ── 3D Viewer ─────────────────────────────────────────────
+let viewer3d       = null;
+let currentStyle3d = 'stick';
+
+function init3DViewer(sdfData) {
+  const container   = document.getElementById('mol-3d-viewer');
+  const unavailable = document.getElementById('viewer-unavailable');
+
+  if (!sdfData) {
+    container.style.display   = 'none';
+    unavailable.style.display = 'flex';
+    return;
+  }
+
+  container.style.display   = 'block';
+  unavailable.style.display = 'none';
+
+  // Wait for container to have dimensions before rendering
+  requestAnimationFrame(() => {
+    // Clear previous viewer
+    container.innerHTML = '';
+    viewer3d = null;
+
+    // Check 3Dmol is loaded
+    if (typeof $3Dmol === 'undefined') {
+      container.innerHTML = '<p style="color:#f59e0b;padding:1rem;font-size:0.8rem">3Dmol.js not loaded. Check your internet connection.</p>';
+      return;
+    }
+
+    const isDark  = document.documentElement.getAttribute('data-theme') !== 'light';
+    const bgColor = isDark ? '#0d0d1a' : '#f0f0f8';
+
+    viewer3d = $3Dmol.createViewer(container, {
+      backgroundColor: bgColor,
+      antialias: true,
+    });
+
+    viewer3d.addModel(sdfData, 'sdf');
+    applyStyle3d('stick');
+    viewer3d.zoomTo();
+    viewer3d.render();
+  });
+}
+
+function applyStyle3d(style) {
+  if (!viewer3d) return;
+  currentStyle3d = style;
+
+  viewer3d.setStyle({}, {});
+
+  if (style === 'stick') {
+    viewer3d.setStyle({}, {
+      stick:  { radius: 0.15, colorscheme: 'Jmol' },
+      sphere: { radius: 0.25, colorscheme: 'Jmol' }
+    });
+  } else if (style === 'sphere') {
+    viewer3d.setStyle({}, {
+      sphere: { colorscheme: 'Jmol' }
+    });
+  } else if (style === 'surface') {
+    viewer3d.setStyle({}, {
+      stick: { radius: 0.1, colorscheme: 'Jmol' }
+    });
+    viewer3d.addSurface($3Dmol.SurfaceType.VDW, {
+      opacity: 0.7,
+      colorscheme: 'whiteCarbon'
+    });
+  }
+
+  viewer3d.render();
+
+  // Update active button
+  document.querySelectorAll('.viewer-btn').forEach(btn => btn.classList.remove('viewer-btn--active'));
+  const activeMap = { stick: 'view-stick', sphere: 'view-sphere', surface: 'view-cartoon' };
+  const activeId  = activeMap[style];
+  if (activeId) document.getElementById(activeId).classList.add('viewer-btn--active');
+}
+
+// Viewer control buttons
+document.getElementById('view-stick').addEventListener('click',   () => applyStyle3d('stick'));
+document.getElementById('view-sphere').addEventListener('click',  () => applyStyle3d('sphere'));
+document.getElementById('view-cartoon').addEventListener('click', () => applyStyle3d('surface'));
+document.getElementById('view-reset').addEventListener('click',   () => {
+  if (viewer3d) { viewer3d.zoomTo(); viewer3d.render(); }
 });
